@@ -1,0 +1,155 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "button trivia",
+      "intents": [
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AnswerIntent",
+          "slots": [
+            {
+              "name": "N",
+              "type": "DIGIT"
+            },
+            {
+              "name": "NN",
+              "type": "DIGIT"
+            },
+            {
+              "name": "NNN",
+              "type": "DIGIT"
+            },
+            {
+              "name": "NNNN",
+              "type": "DIGIT"
+            },
+            {
+              "name": "NNNNN",
+              "type": "DIGIT"
+            },
+            {
+              "name": "NNNNNN",
+              "type": "DIGIT"
+            },
+            {
+              "name": "NNNNNNN",
+              "type": "DIGIT"
+            },
+            {
+              "name": "NNNNNNNN",
+              "type": "DIGIT"
+            },
+            {
+              "name": "NNNNNNNNN",
+              "type": "DIGIT"
+            }
+          ],
+          "samples": [
+            "{N} {NN}",
+            "{N} {NN} {NNN}",
+            "{N} {NN} {NNN} {NNNN}",
+            "{N} {NN} {NNN} {NNNN} {NNNNN}",
+            "{N} {NN} {NNN} {NNNN} {NNNNN} {NNNNNN}",
+            "{N} {NN} {NNN} {NNNN} {NNNNN} {NNNNNN} {NNNNNNN}",
+            "{N} {NN} {NNN} {NNNN} {NNNNN} {NNNNNN} {NNNNNNN} {NNNNNNNN}",
+            "{N} {NN} {NNN} {NNNN} {NNNNN} {NNNNNN} {NNNNNNN} {NNNNNNNN} {NNNNNNNNN}"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "values": [
+            {
+              "name": {
+                "value": "9",
+                "synonyms": [
+                  "nine"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "8",
+                "synonyms": [
+                  "eight"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "7",
+                "synonyms": [
+                  "seven"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "6",
+                "synonyms": [
+                  "six"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "5",
+                "synonyms": [
+                  "five"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "4",
+                "synonyms": [
+                  "four"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "3",
+                "synonyms": [
+                  "three"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "2",
+                "synonyms": [
+                  "two"
+                ]
+              }
+            },
+            {
+              "name": {
+                "value": "1",
+                "synonyms": [
+                  "one"
+                ]
+              }
+            }
+          ],
+          "name": "DIGIT"
+        }
+      ]
+    }
+  }
+}
