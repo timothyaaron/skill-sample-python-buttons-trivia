@@ -17,7 +17,7 @@ from config import settings
 
 ENV = os.environ.get('ENV')
 adapter_config = {
-    "table_name": settings['STORAGE']['session_table'],
+    "table_name": settings.STORAGE['session_table'],
     "create_table": ENV == 'DEV',
 }
 if ENV == 'DEV':
@@ -59,13 +59,13 @@ class LaunchHandler(AbstractRequestHandler):
         request_attrs = attrs_manager.request_attributes
         session_attrs = attrs_manager.session_attributes
         persistent_attrs = attrs_manager.persistent_attributes
-        session_attrs['STATE'] = settings['STATE']['start_game']
+        session_attrs['STATE'] = settings.STATES['start_game']
 
         # Check to see if we have an active game
         player_count = session_attrs.get('player_count') or 0
         current_question = session_attrs.get('current_question') or 0
-        valid_player_count = player_count and player_count <= settings['GAME']['max_players']
-        game_in_progress = current_question < settings['GAME']['questions_per_game']
+        valid_player_count = player_count and player_count <= settings.GAME_OPTIONS['max_players']
+        game_in_progress = current_question < settings.GAME_OPTIONS['questions_per_game']
 
         # If there's an active game, resume; otherwise start a new game by asking how many players
         if valid_player_count and game_in_progress:
@@ -91,7 +91,7 @@ class LaunchHandler(AbstractRequestHandler):
 
         # Send intro animation
         request_attrs['directives'].append(
-            GadgetController.set_idle_animation(settings['ANIMATIONS']['intro'])
+            GadgetController.set_idle_animation(settings.ANIMATIONS['intro'])
         )
 
         return handler_input.response_builder.response
@@ -119,7 +119,7 @@ class PlayerCountHandler(AbstractRequestHandler):
                 is_intent_name("PlayerCount")(handler_input) or
                 is_intent_name("PlayerCountOnly")(handler_input)
             ) and
-            session_attrs['STATE'] == settings['STATE']['start_game']
+            session_attrs['STATE'] == settings.STATES['start_game']
         )
 
     def handle(self, handler_input):
@@ -132,25 +132,25 @@ class PlayerCountHandler(AbstractRequestHandler):
 
         player_count = int(slots["players"].value) if slots.get('players') else 0
         session_attrs['player_count'] = player_count
-        valid_player_count = player_count and player_count <= settings['GAME']['max_players']
+        valid_player_count = player_count and player_count <= settings.GAME_OPTIONS['max_players']
 
         if valid_player_count:
             if player_count == 1:
-                session_attrs['STATE'] = settings['STATE']['buttonless_game']
+                session_attrs['STATE'] = settings.STATES['buttonless_game']
                 #     let responseMessage = ctx.t('SINGLE_PLAYER_GAME_READY');
                 messages = {
                     'output_speech': 'Single player game.',
                     'reprompt': 'No really. Single player game.',
                 }
                 #     ctx.render(handlerInput, responseMessage);
-                request_attrs['output_speech'].append(settings['AUDIO']['roll_call_complete'])
+                request_attrs['output_speech'].append(settings.AUDIO['roll_call_complete'])
                 request_attrs['output_speech'].append(messages['output_speech'])
                 request_attrs['reprompt'].append(messages['reprompt'])
 
                 request_attrs['open_microphone'] = True
 
             else:
-                session_attrs['STATE'] = settings['STATE']['rollcall']  # handled inside RollCall
+                session_attrs['STATE'] = settings.STATES['rollcall']  # handled inside RollCall
                 #     RollCall.start(handlerInput, false, sessionAttributes.playerCount);
         else:
             del session_attrs['STATE']  # bug? Can't save empty string to db
@@ -177,9 +177,9 @@ class RequestInterceptor(AbstractRequestInterceptor):
 
         # Ensure a state in case we're starting fresh
         if session_attrs.get('STATE') is None:
-            session_attrs['STATE'] = settings['STATE']['start_game']
+            session_attrs['STATE'] = settings.STATES['start_game']
         elif session_attrs.get('STATE') == '_GAME_LOOP':
-            session_attrs['STATE'] = settings['STATE']['button_game']
+            session_attrs['STATE'] = settings.STATES['button_game']
 
         # Apply the persistent attributes to the current session
         attrs_manager.session_attributes = {**persistent_attrs, **session_attrs}
@@ -250,7 +250,7 @@ class ResponseInterceptor(AbstractResponseInterceptor):
 
 
 sb = CustomSkillBuilder(persistence_adapter=DynamoDbAdapter(**adapter_config))
-sb.skill_id = settings['APP_ID']
+sb.skill_id = settings.APP_ID
 
 sb.add_request_handler(LaunchHandler())
 sb.add_request_handler(StartNewGameHandler())

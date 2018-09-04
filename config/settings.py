@@ -137,17 +137,17 @@ Set up light animations that will be used throughout the game
 """
 roll_call_complete_colors = ['red', 'orange', 'green', 'yellow', 'white']
 ANIMATIONS = {
-    'intro': ComplexAnimations.SpectrumAnimation(10, ["red", "orange", "yellow"]),
-    'pre_roll_call': BasicAnimations.FadeInAnimation(1, "white", 40000),
-    'roll_call_button_added': BasicAnimations.SolidAnimation(1, "green", 40000),
-    'roll_call_complete': ComplexAnimations.SpectrumAnimation(6, roll_call_complete_colors),
-    'roll_call_checkin': BasicAnimations.SolidAnimation(1, "green", 3000),
-    'buzz_in': BasicAnimations.SolidAnimation(1, COLORS['buzz_in_color'], 6000),
-    'buzz_in_other_players': BasicAnimations.SolidAnimation(1, 'black', 200),
-    'listen_for_answer': BasicAnimations.SolidAnimation(1, COLORS['question_color'], 26000),
-    'incorrect_answer': ComplexAnimations.AnswerAnimation(COLORS['incorrect_color'], 'black', 1000),
-    'correct_answer': ComplexAnimations.AnswerAnimation(COLORS['correct_color'], 'black', 1000),
-    'exit': BasicAnimations.FadeOutAnimation(1, COLORS['exit_color'], 1500),
+    'intro': ComplexAnimations.spectrum(10, ["red", "orange", "yellow"]),
+    'pre_roll_call': BasicAnimations.fade_in(1, "white", 40000),
+    'roll_call_button_added': BasicAnimations.solid(1, "green", 40000),
+    'roll_call_complete': ComplexAnimations.spectrum(6, roll_call_complete_colors),
+    'roll_call_checkin': BasicAnimations.solid(1, "green", 3000),
+    'buzz_in': BasicAnimations.solid(1, COLORS['buzz_in'], 6000),
+    'buzz_in_other_players': BasicAnimations.solid(1, 'black', 200),
+    'listen_for_answer': BasicAnimations.solid(1, COLORS['question'], 26000),
+    'incorrect_answer': ComplexAnimations.answer(COLORS['incorrect'], 'black', 1000),
+    'correct_answer': ComplexAnimations.answer(COLORS['correct'], 'black', 1000),
+    'exit': BasicAnimations.fade_out(1, COLORS['exit'], 1500),
 }
 
 """
@@ -158,7 +158,7 @@ START_GAME_STATE (which maps to the initial state).
 Start mode performs roll call and button registration.
 https://developer.amazon.com/docs/gadget-skills/discover-echo-buttons.html
 """
-SKILL_STATES = {
+STATES = {
     'start_game': '',
     'rollcall': '_ROLLCALL',
     'button_game': '_BUTTON_GAME',
