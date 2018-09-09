@@ -159,7 +159,7 @@ Start mode performs roll call and button registration.
 https://developer.amazon.com/docs/gadget-skills/discover-echo-buttons.html
 """
 STATES = {
-    'start_game': '',
+    'start_game': '_',  # empty string not allowed by dynamodb
     'rollcall': '_ROLLCALL',
     'button_game': '_BUTTON_GAME',
     'buttonless_game': '_BUTTONLESS_GAME'

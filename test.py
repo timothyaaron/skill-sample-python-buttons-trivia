@@ -3,6 +3,8 @@ import main
 import uuid
 from datetime import datetime
 
+from config import settings
+
 context = {}
 
 
@@ -95,7 +97,7 @@ def test_relaunch():
 
 def test_player_count_invalid():
     request = new_request('PlayerCount', {'players': 100})
-    request['session']['attributes'] = {'STATE': ''}
+    request['session']['attributes'] = {'STATE': settings.STATES['start_game']}
     response = main.handler(request, context={})
 
     assert 'Please say a valid number.' in response['response']['outputSpeech']['ssml']
@@ -107,7 +109,7 @@ def test_player_count_invalid():
 
 def test_player_count():
     request = new_request('PlayerCount', {'players': 1})
-    request['session']['attributes'] = {'STATE': ''}
+    request['session']['attributes'] = {'STATE': settings.STATES['start_game']}
     response = main.handler(request, context={})
 
     assert 'audio src=' in response['response']['outputSpeech']['ssml']
