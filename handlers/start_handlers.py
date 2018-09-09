@@ -5,7 +5,7 @@ from config import settings
 from utils.directives import GadgetController
 
 
-class LaunchHandler(AbstractRequestHandler):
+class LaunchPlayGameHandler(AbstractRequestHandler):
     def can_handle(self, handler_input):
         return (
             is_request_type("LaunchRequest")(handler_input) or
@@ -17,7 +17,7 @@ class LaunchHandler(AbstractRequestHandler):
         )
 
     def handle(self, handler_input):
-        print('LaunchHandler ----------------------')
+        print('LaunchPlayGameHandler ----------------------')
         attrs_manager = handler_input.attributes_manager
         request_attrs = attrs_manager.request_attributes
         session_attrs = attrs_manager.session_attributes

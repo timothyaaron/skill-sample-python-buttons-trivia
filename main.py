@@ -8,7 +8,7 @@ from ask_sdk_core.skill_builder import CustomSkillBuilder
 from ask_sdk_dynamodb.adapter import DynamoDbAdapter
 
 from config import settings
-from handlers import global_handlers, start_handlers
+from handlers import global_handlers, start_handlers, roll_call_handlers
 
 ENV = os.environ.get('ENV')
 adapter_config = {
@@ -25,11 +25,14 @@ else:
 sb = CustomSkillBuilder(persistence_adapter=DynamoDbAdapter(**adapter_config))
 sb.skill_id = settings.APP_ID
 
-sb.add_request_handler(start_handlers.LaunchHandler())
-sb.add_request_handler(start_handlers.StartNewGameHandler())
+sb.add_request_handler(roll_call_handlers.YesHandler())
+sb.add_request_handler(roll_call_handlers.NoHandler())
+sb.add_request_handler(roll_call_handlers.GameEventHandler())
 sb.add_request_handler(start_handlers.PlayerCountHandler())
-sb.add_request_handler(start_handlers.NoHandler())
 sb.add_request_handler(start_handlers.YesHandler())
+sb.add_request_handler(start_handlers.NoHandler())
+sb.add_request_handler(start_handlers.LaunchPlayGameHandler())
+sb.add_request_handler(start_handlers.StartNewGameHandler())
 sb.add_request_handler(global_handlers.HelpHandler())
 sb.add_request_handler(global_handlers.StopCancelHandler())
 sb.add_request_handler(global_handlers.SessionEndedRequestHandler())
