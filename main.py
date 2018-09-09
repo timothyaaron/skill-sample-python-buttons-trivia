@@ -30,6 +30,11 @@ sb.add_request_handler(start_handlers.StartNewGameHandler())
 sb.add_request_handler(start_handlers.PlayerCountHandler())
 sb.add_request_handler(start_handlers.NoHandler())
 sb.add_request_handler(start_handlers.YesHandler())
+sb.add_request_handler(global_handlers.HelpHandler())
+sb.add_request_handler(global_handlers.StopCancelHandler())
+sb.add_request_handler(global_handlers.SessionEndedRequestHandler())
+sb.add_request_handler(global_handlers.DefaultHandler())
+
 sb.add_global_request_interceptor(global_handlers.RequestInterceptor())
 sb.add_global_response_interceptor(global_handlers.ResponseInterceptor())
 

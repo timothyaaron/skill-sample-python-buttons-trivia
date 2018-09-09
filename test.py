@@ -167,3 +167,9 @@ def test_start_yes_valid_four():
     #     'STATE': settings.STATES['buttonless_game'],
     #     'player_count': 4,
     # }
+
+
+def test_end_session():
+    response = main.handler(new_request('SessionEndedRequest'), context={})
+
+    assert response['response'] == {'shouldEndSession': True}
