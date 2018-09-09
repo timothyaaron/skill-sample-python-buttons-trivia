@@ -19,7 +19,6 @@ class RequestInterceptor(AbstractRequestInterceptor):
             session_attrs['STATE'] = settings.STATES['start_game']
         elif session_attrs.get('STATE') == '_GAME_LOOP':
             session_attrs['STATE'] = settings.STATES['button_game']
-
         # Apply the persistent attributes to the current session
         attrs_manager.session_attributes = {**persistent_attrs, **session_attrs}
 

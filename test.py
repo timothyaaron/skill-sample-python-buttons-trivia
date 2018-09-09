@@ -116,6 +116,54 @@ def test_player_count():
     assert 'Single player game' in response['response']['outputSpeech']['ssml']
     assert 'No really. Single' in response['response']['reprompt']['outputSpeech']['ssml']
     assert response['sessionAttributes'] == {
-        'STATE': '_BUTTONLESS_GAME',
+        'STATE': settings.STATES['buttonless_game'],
         'player_count': 1,
     }
+
+
+def test_start_yes_invalid():
+    request = new_request('AMAZON.YesIntent')
+    request['session']['attributes'] = {
+        'player_count': 99,
+        'STATE': settings.STATES['start_game'],
+    }
+    response = main.handler(request, context={})
+
+    assert 'How many players' in response['response']['outputSpeech']['ssml']
+    assert 'How many players' in response['response']['reprompt']['outputSpeech']['ssml']
+    assert response['sessionAttributes'] == {
+        'STATE': settings.STATES['start_game'],
+        'player_count': 99,
+    }
+
+
+def test_start_yes_valid_one():
+    request = new_request('AMAZON.YesIntent')
+    request['session']['attributes'] = {
+        'player_count': 1,
+        'STATE': settings.STATES['start_game'],
+    }
+    response = main.handler(request, context={})
+
+    assert 'Single player game' in response['response']['outputSpeech']['ssml']
+    assert 'No really. Single' in response['response']['reprompt']['outputSpeech']['ssml']
+    assert response['sessionAttributes'] == {
+        'STATE': settings.STATES['buttonless_game'],
+        'player_count': 1,
+    }
+
+
+def test_start_yes_valid_four():
+    request = new_request('AMAZON.YesIntent')
+    request['session']['attributes'] = {
+        'player_count': 4,
+        'STATE': settings.STATES['start_game'],
+    }
+    response = main.handler(request, context={})
+
+    # assert 'Single player game' in response['response']['outputSpeech']['ssml']
+    # assert 'No really. Single' in response['response']['reprompt']['outputSpeech']['ssml']
+    # assert response['sessionAttributes'] == {
+    #     'STATE': settings.STATES['buttonless_game'],
+    #     'player_count': 4,
+    # }

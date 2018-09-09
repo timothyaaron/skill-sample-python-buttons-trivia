@@ -8,15 +8,7 @@ from ask_sdk_core.skill_builder import CustomSkillBuilder
 from ask_sdk_dynamodb.adapter import DynamoDbAdapter
 
 from config import settings
-from handlers.start_handlers import (
-    LaunchHandler,
-    StartNewGameHandler,
-    PlayerCountHandler,
-)
-from handlers.global_handlers import (
-    RequestInterceptor,
-    ResponseInterceptor,
-)
+from handlers import global_handlers, start_handlers
 
 ENV = os.environ.get('ENV')
 adapter_config = {
@@ -33,10 +25,12 @@ else:
 sb = CustomSkillBuilder(persistence_adapter=DynamoDbAdapter(**adapter_config))
 sb.skill_id = settings.APP_ID
 
-sb.add_request_handler(LaunchHandler())
-sb.add_request_handler(StartNewGameHandler())
-sb.add_request_handler(PlayerCountHandler())
-sb.add_global_request_interceptor(RequestInterceptor())
-sb.add_global_response_interceptor(ResponseInterceptor())
+sb.add_request_handler(start_handlers.LaunchHandler())
+sb.add_request_handler(start_handlers.StartNewGameHandler())
+sb.add_request_handler(start_handlers.PlayerCountHandler())
+sb.add_request_handler(start_handlers.NoHandler())
+sb.add_request_handler(start_handlers.YesHandler())
+sb.add_global_request_interceptor(global_handlers.RequestInterceptor())
+sb.add_global_response_interceptor(global_handlers.ResponseInterceptor())
 
 handler = sb.lambda_handler()

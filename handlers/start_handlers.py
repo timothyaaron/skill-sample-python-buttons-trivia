@@ -130,3 +130,101 @@ class PlayerCountHandler(AbstractRequestHandler):
             request_attrs['open_microphone'] = True
 
         return handler_input.response_builder.response
+
+
+class NoHandler(AbstractRequestHandler):
+    def can_handle(self, handler_input):
+        session_attrs = handler_input.attributes_manager.session_attributes
+        return (
+            is_request_type("IntentRequest")(handler_input) and
+            is_intent_name("AMAZON.NoIntent")(handler_input) and
+            session_attrs['STATE'] == settings.STATES['start_game']
+        )
+
+    def handle(self, handler_input):
+        print('start_handlers.NoHandler ----------------------')
+        request_attrs = handler_input.attributes_manager.request_attributes
+
+        #   let responseMessage = ctx.t('DONT_RESUME_GAME');
+        messages = {
+            'output_speech': 'Ok, lets start a new game. How many players will be playing?',
+            'reprompt': 'How many players?',
+        }
+        request_attrs['output_speech'].append(messages['output_speech'])
+        request_attrs['reprompt'].append(messages['reprompt'])
+        # ctx.render(handlerInput, responseMessage);
+        request_attrs['open_microphone'] = True
+
+        # Send intro animation
+        request_attrs['directives'].append(
+            GadgetController.set_idle_animation({
+                'animations': settings.ANIMATIONS['intro'],
+            })
+        )
+
+        # new game, delete all attributes
+        handler_input.attributes_manager.session_attributes = {}
+
+        return handler_input.response_builder.response
+
+
+class YesHandler(AbstractRequestHandler):
+    def can_handle(self, handler_input):
+        session_attrs = handler_input.attributes_manager.session_attributes
+        return (
+            is_request_type("IntentRequest")(handler_input) and
+            is_intent_name("AMAZON.YesIntent")(handler_input) and
+            session_attrs['STATE'] == settings.STATES['start_game']
+        )
+
+    def handle(self, handler_input):
+        print('start_handlers.YesHandler ----------------------')
+        request_attrs = handler_input.attributes_manager.request_attributes
+        session_attrs = handler_input.attributes_manager.session_attributes
+
+        player_count = session_attrs['player_count']
+        valid_player_count = player_count and player_count <= settings.GAME_OPTIONS['max_players']
+
+        if valid_player_count:
+            if player_count == 1:
+                session_attrs['STATE'] = settings.STATES['buttonless_game']
+                #     let responseMessage = ctx.t('SINGLE_PLAYER_GAME_READY');
+                messages = {
+                    'output_speech': 'Single player game.',
+                    'reprompt': 'No really. Single player game.',
+                }
+                #     ctx.render(handlerInput, responseMessage);
+                request_attrs['output_speech'].append(settings.AUDIO['roll_call_complete'])
+                request_attrs['output_speech'].append(messages['output_speech'])
+                request_attrs['reprompt'].append(messages['reprompt'])
+
+                request_attrs['open_microphone'] = True
+
+            else:
+                buttons = session_attrs.get('buttons')
+                resuming = buttons and len(buttons) == player_count
+                # RollCall.start(handlerInput, resumingGame, sessionAttributes.playerCount);
+        else:
+            print('Resuming roll call, but starting from scratch.')
+
+            # Send intro animation
+            request_attrs['directives'].append(
+                GadgetController.set_idle_animation({
+                    'animations': settings.ANIMATIONS['intro'],
+                })
+            )
+
+            #   let responseMessage = ctx.t('RESUME_GAME');
+            messages = {
+                'output_speech': (
+                    'Ok, we will pick up where you left off. '
+                    'How many players will be playing?'
+                ),
+                'reprompt': 'How many players?',
+            }
+            request_attrs['output_speech'].append(messages['output_speech'])
+            request_attrs['reprompt'].append(messages['reprompt'])
+            # ctx.render(handlerInput, responseMessage);
+            request_attrs['open_microphone'] = True
+
+        return handler_input.response_builder.response
