@@ -5,7 +5,10 @@ from ask_sdk_core.dispatch_components import (
 )
 from ask_sdk_core.utils import is_intent_name, is_request_type
 
+import utils
+
 from config import settings
+from utils.display import Display
 
 
 class RequestInterceptor(AbstractRequestInterceptor):
@@ -28,10 +31,6 @@ class RequestInterceptor(AbstractRequestInterceptor):
         request_attrs['directives'] = []
         request_attrs['output_speech'] = []
         request_attrs['reprompt'] = []
-
-        # For ease of use we'll attach the utilities for rendering display
-        # and handling localized tts to the request attributes
-        # TODO
 
 
 class ResponseInterceptor(AbstractResponseInterceptor):
@@ -57,10 +56,7 @@ class ResponseInterceptor(AbstractResponseInterceptor):
             reprompt = ' '.join(request_attrs['reprompt'])
             response_builder.ask(reprompt)
 
-        # Add the display response
-        if request_attrs.get('render_template'):
-            response_builder.add_render_template_directive(request_attrs['render_template'])
-
+        # Adding display directives via Display.render, see next section
         response = response_builder.response
 
         # Apply the custom directives to the response
@@ -94,16 +90,12 @@ class DefaultHandler(AbstractRequestHandler):
         return True
 
     def handle(self, handler_input):
-        print('start_handlers.DefaultHandler ----------------------')
+        print('DefaultHandler ----------------------')
         request_attrs = handler_input.attributes_manager.request_attributes
 
-        #     let responseMessage = ctx.t('UNHANDLED_REQUEST');
-        messages = {
-            'output_speech': 'unhandled',
-            'reprompt': 'unhandled',
-        }
-        request_attrs['output_speech'].append(settings.AUDIO['roll_call_complete'])
-        request_attrs['reprompt'].append(messages['reprompt'])
+        message = utils._('UNHANDLED_REQUEST')
+        request_attrs['output_speech'].append(message['output_speech'])
+        request_attrs['reprompt'].append(message['reprompt'])
         request_attrs['open_microphone'] = True
 
         return handler_input.response_builder.response
@@ -128,7 +120,7 @@ class HelpHandler(AbstractRequestHandler):
         )
 
     def handle(self, handler_input):
-        print('start_handlers.HelpHandler ----------------------')
+        print('HelpHandler ----------------------')
         request_attrs = handler_input.attributes_manager.request_attributes
         session_attrs = handler_input.attributes_manager.session_attributes
 
@@ -142,14 +134,10 @@ class HelpHandler(AbstractRequestHandler):
         else:
             message_key = 'GENERAL_HELP'
 
-        #   let responseMessage = ctx.t('RESUME_GAME');
-        messages = {
-            'output_speech': message_key,
-            'reprompt': message_key,
-        }
-        request_attrs['output_speech'].append(messages['output_speech'])
-        request_attrs['reprompt'].append(messages['reprompt'])
-        # ctx.render(handlerInput, responseMessage);
+        message = utils._(message_key)
+        request_attrs['output_speech'].append(message['output_speech'])
+        request_attrs['reprompt'].append(message['reprompt'])
+        # Display.render(handler_input, message)
         request_attrs['open_microphone'] = True
 
         return handler_input.response_builder.response
@@ -166,12 +154,13 @@ class StopCancelHandler(AbstractRequestHandler):
         )
 
     def handle(self, handler_input):
-        print('start_handlers.StopCancelHandler ----------------------')
+        print('StopCancelHandler ----------------------')
         request_attrs = handler_input.attributes_manager.request_attributes
 
-        #   let responseMessage = ctx.t('GOOD_BYE');
-        request_attrs['output_speech'].append('GOOD_BYE')
-        request_attrs['open_microphone'] = True
+        message = utils._('GOOD_BYE')
+        request_attrs['output_speech'].append(message['output_speech'])
+        request_attrs['open_microphone'] = False
+        handler_input.response_builder.set_should_end_session(True)
 
         return handler_input.response_builder.response
 
@@ -181,8 +170,7 @@ class SessionEndedRequestHandler(AbstractRequestHandler):
         return is_request_type("SessionEndedRequest")(handler_input)
 
     def handle(self, handler_input):
-        print('start_handlers.SessionEndedRequestHandler ----------------------')
-        # request_attrs = handler_input.attributes_manager.request_attributes
+        print('SessionEndedRequestHandler ----------------------')
         session_attrs = handler_input.attributes_manager.session_attributes
 
         print(f'Reason: {handler_input.request_envelope.request.reason}')

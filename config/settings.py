@@ -27,6 +27,7 @@ Game Settings
        each question is presented in the same answer as they are listed in the questions file.
 """
 GAME_OPTIONS = {
+    'game_title': 'Even Better Button Trivia',
     'max_players': 4,
     'questions_per_game': 6,
     'questions_per_round': 2,

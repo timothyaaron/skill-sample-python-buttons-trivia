@@ -1,6 +1,8 @@
 from ask_sdk_core.dispatch_components import AbstractRequestHandler
 from ask_sdk_core.utils import is_intent_name, is_request_type
 
+import utils
+
 from config import settings
 from utils.rollcall import RollCall
 
@@ -46,11 +48,8 @@ class NoHandler(AbstractRequestHandler):
         print('start_handlers.NoHandler ----------------------')
         request_attrs = handler_input.attributes_manager.request_attributes
 
-        # let responseMessage = ctx.t('GOOD_BYE');
-        messages = {
-            'output_speech': 'rollcall.no',
-        }
-        request_attrs['output_speech'].append(messages['output_speech'])
+        message = utils._('GOOD_BYE')
+        request_attrs['output_speech'].append(message['output_speech'])
         request_attrs['open_microphone'] = False
         handler_input.response_builder.set_should_end_session(True)
 

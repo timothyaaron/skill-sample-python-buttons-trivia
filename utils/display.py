@@ -1,10 +1,11 @@
-from ask_skd_model.interfaces.display import ImageInstance, TextContent
+from ask_sdk_model.interfaces.display import ImageInstance, TextContent
 from config import settings
 # from utils import logger
 
 
 class Display:
-    def render(handler_input, display_title, display_text, bg_image, display_subtext="", image=""):
+    @staticmethod
+    def render(handler_input, message):
         request_attrs = handler_input.attributes_manager.request_attributes
 
         # # Check for display
@@ -13,19 +14,19 @@ class Display:
         #     return;
         # }
 
-        if not display_text:
+        if not message.get('display_text'):
             print('Render template without primary text!')
 
-        text = display_text or ''
+        text = message.get('display_text', '')
         if isinstance(text, list):
             text = settings.pick_random(text)
 
-        subtext = display_subtext or ''
+        subtext = message.get('display_subtext', '')
         if isinstance(subtext, list):
             subtext = settings.pick_random(subtext)
 
         background = (
-            bg_image or
+            message.get('bg_image') or
             settings.pick_random(settings.IMAGES['background'])
         )
 
@@ -33,12 +34,14 @@ class Display:
             'type': 'BodyTemplate1',
             'backButton': 'HIDDEN',
             'backgroundImage': str(ImageInstance(background)),
-            'title': display_title,
+            'title': message['display_title'],
             'textContent': str(TextContent(text, subtext)),
         }
 
-        if image:
+        if message.get('image'):
             template['type']: 'BodyTemplate3'
-            template['image']: str(ImageInstance(image))
+            template['image']: str(ImageInstance(message['image']))
 
-        request_attrs.render_template(template)
+        # directive = template  # need to build the Display Directive
+
+        # request_attrs['directives'].append(directive)

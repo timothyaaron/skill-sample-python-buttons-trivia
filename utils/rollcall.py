@@ -1,12 +1,15 @@
+import utils
+
 from config import settings
 from utils import animations, directives  # , logger
+from utils.display import Display
 
 
 DEFAULT_BUTTON_ANIMATION_DIRECTIVES = {
     'button_down': directives.GadgetController.set_button_down_animation({
         'animations': animations.BasicAnimations.fade_out(1, "blue", 200)
     }),
-    'button_up': directives.GadgetController.setButtonUpAnimation({
+    'button_up': directives.GadgetController.set_button_up_animation({
         'animations': animations.BasicAnimations.solid(1, "black", 100)
     })
 }
@@ -130,7 +133,7 @@ class Helper:
         request_attrs = handler_input.attributes_manager.request_attributes
         session_attrs = handler_input.attributes_manager.session_attributes
 
-        session_attrs['input_handler_id'] = handler_input.request_envelope.request.requestId
+        session_attrs['input_handler_id'] = handler_input.request_envelope.request.request_id
         request_attrs['directives'].append(directives.GameEngine.start_input_handler(config))
 
         # Send Pre-Roll Call Animation to all connected buttons
@@ -188,28 +191,28 @@ class Helper:
         current_prompts = None
         if settings.ROLLCALL['named_players']:
             # tell the next player to press their button.
-            response_message = request_attrs.t('roll_call_hello_player', {
+            message = utils._('ROLL_CALL_HELLO_PLAYER', {
                 player_number: len(session_attrs['buttons'])
             })
-            current_prompts = response_message
+            current_prompts = message
 
-        response_message = request_attrs.t('roll_call_complete', len(session_attrs['buttons']))
+        message = utils._('ROLL_CALL_COMPLETE', len(session_attrs['buttons']))
         mixed_output_speech = ''
         if current_prompts:
             mixed_output_speech = " ".join([
                 current_prompts.output_speech,
                 settings.AUDIO['roll_call_complete'],
-                settings.pick_random(response_message['output_speech']),
+                settings.pick_random(message['output_speech']),
             ])
         else:
             mixed_output_speech = " ".join([
                 settings.AUDIO['roll_call_complete'],
-                settings.pick_random(response_message['output_speech']),
+                settings.pick_random(message['output_speech']),
             ])
 
-        request_attrs.render(handler_input, response_message)
+        request_attrs.render(handler_input, message)
         request_attrs['output_speech'].append(mixed_output_speech)
-        request_attrs['reprompt'].append(response_message['reprompt'])
+        request_attrs['reprompt'].append(message['reprompt'])
         request_attrs['open_microphone'] = True
 
     # handles the case when the roll call process times out before all players are checked in
@@ -223,9 +226,9 @@ class Helper:
         request_attrs['directives'].append(DEFAULT_BUTTON_ANIMATION_DIRECTIVES['button_down'])
         request_attrs['directives'].append(DEFAULT_BUTTON_ANIMATION_DIRECTIVES['button_up'])
 
-        response_message = request_attrs.t('roll_call_time_out')
-        request_attrs['output_speech'].append(response_message['output_speech'])
-        request_attrs['reprompt'].append(response_message['reprompt'])
+        message = utils._('ROLL_CALL_TIME_OUT')
+        request_attrs['output_speech'].append(message['output_speech'])
+        request_attrs['reprompt'].append(message['reprompt'])
         request_attrs['open_microphone'] = True
 
     @staticmethod
@@ -271,16 +274,16 @@ class Helper:
 
         if (settings.ROLLCALL['NAMED_PLAYERS']):
             # tell the next player to press their button.
-            response_message = request_attrs.t('roll_call_hello_player', {
+            message = utils._('ROLL_CALL_HELLO_PLAYER', {
                 player_number: player_number
             })
-            current_prompts = response_message
-            response_message = request_attrs.t('roll_call_next_player_prompt', {
+            current_prompts = message
+            message = utils._('ROLL_CALL_NEXT_PLAYER_PROMPT', {
                 player_number: player_number + 1
             })
             request_attrs['output_speech'].append(current_prompts['output_speech'])
             request_attrs['output_speech'].append("<break time='1s'/>")
-            request_attrs['output_speech'].append(response_message['output_speech'])
+            request_attrs['output_speech'].append(message['output_speech'])
             request_attrs['output_speech'].append(settings.AUDIO['waiting_for_roll_call'])
 
         request_attrs['open_microphone'] = False
@@ -290,16 +293,16 @@ class Helper:
         print('ROLLCALL_HELPER: resume roll call')
         request_attrs = handler_input.attributes_manager.request_attributes
         session_attrs = handler_input.attributes_manager.session_attributes
-        config = Helper.generate_input_handler_config({
+        config = Helper.generate_input_handler_config(**{
             'player_count': session_attrs['player_count'],
             'timeout': 35000,  # allow 35 seconds for roll call to complete
         })
         Helper.listen_for_roll_call(handler_input, config)
 
-        response_message = request_attrs.t(message_key)
-        request_attrs.render(handler_input, response_message)
-        request_attrs['output_speech'].append(response_message['output_speech'])
-        request_attrs['output_speech'].append(settings.AUDIO['WAITING_FOR_ROLL_CALL'])
+        message = utils._(message_key)
+        Display.render(handler_input, message)
+        request_attrs['output_speech'].append(message['output_speech'])
+        request_attrs['output_speech'].append(settings.AUDIO['waiting_for_roll_call'])
         request_attrs['open_microphone'] = True
 
         session_attrs['buttons'] = []
@@ -312,12 +315,12 @@ class RollCall:
         request_attrs = handler_input.attributes_manager.request_attributes
         session_attrs = handler_input.attributes_manager.session_attributes
 
-        session_attrs['STATE'] = settings.STATE['rollcall']
+        session_attrs['STATE'] = settings.STATES['rollcall']
         session_attrs['player_count'] = player_count
         session_attrs['buttons'] = []
         request_attrs['open_microphone'] = False
 
-        message_key = 'roll_call_resume_game' if resuming_game else 'roll_call_continue'
+        message_key = 'ROLL_CALL_RESUME_GAME' if resuming_game else 'ROLL_CALL_CONTINUE'
         Helper.start_roll_call(handler_input, message_key)
 
     def cancel(handler_input):

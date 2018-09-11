@@ -71,11 +71,19 @@ def new_request(name, slots={}):
     return req_env
 
 
+def test_default():
+    response = main.handler(new_request('NotAThingIntent'), context={})
+
+    assert "Sorry, I didn't get that" in response['response']['outputSpeech']['ssml']
+    assert "Please say it again" in response['response']['reprompt']['outputSpeech']['ssml']
+    assert response['response']['shouldEndSession'] is False
+
+
 def test_launch():
     response = main.handler(new_request('LaunchRequest'), context={})
 
-    assert response['response']['outputSpeech']['ssml'] == '<speak>Starting game...</speak>'
-    assert response['response']['reprompt']['outputSpeech']['ssml'] == '<speak>Starting.</speak>'
+    assert 'Welcome to Even Better Button Trivia.' in response['response']['outputSpeech']['ssml']
+    assert 'How many players' in response['response']['reprompt']['outputSpeech']['ssml']
     assert response['sessionAttributes'] == {}
     assert response['response']['directives'][0]['type'] == 'GadgetController.SetLight'
 
@@ -88,9 +96,9 @@ def test_relaunch():
     }
     response = main.handler(request, context={})
 
-    output = '<speak>Restarting game with 2 players...</speak>'
-    assert response['response']['outputSpeech']['ssml'] == output
-    assert response['response']['reprompt']['outputSpeech']['ssml'] == '<speak>Restarting.</speak>'
+    output = 'It looks like you have a 2 player'
+    assert output in response['response']['outputSpeech']['ssml']
+    assert 'Would you like to resume' in response['response']['reprompt']['outputSpeech']['ssml']
     assert response['response']['directives'][0]['type'] == 'GadgetController.SetLight'
     assert response['sessionAttributes'] == {}
 
@@ -100,10 +108,11 @@ def test_player_count_invalid():
     request['session']['attributes'] = {'STATE': settings.STATES['start_game']}
     response = main.handler(request, context={})
 
-    assert 'Please say a valid number.' in response['response']['outputSpeech']['ssml']
-    assert 'Please say a valid number.' in response['response']['reprompt']['outputSpeech']['ssml']
+    assert 'between 1 and 4' in response['response']['outputSpeech']['ssml']
+    assert 'between 1 and 4' in response['response']['reprompt']['outputSpeech']['ssml']
     assert response['sessionAttributes'] == {
         'player_count': 100,
+        'STATE': settings.STATES['start_game'],
     }
 
 
@@ -113,8 +122,8 @@ def test_player_count():
     response = main.handler(request, context={})
 
     assert 'audio src=' in response['response']['outputSpeech']['ssml']
-    assert 'Single player game' in response['response']['outputSpeech']['ssml']
-    assert 'No really. Single' in response['response']['reprompt']['outputSpeech']['ssml']
+    assert 'Fantastic! Are you ready' in response['response']['outputSpeech']['ssml']
+    assert 'Ready to start' in response['response']['reprompt']['outputSpeech']['ssml']
     assert response['sessionAttributes'] == {
         'STATE': settings.STATES['buttonless_game'],
         'player_count': 1,
@@ -145,8 +154,9 @@ def test_start_yes_valid_one():
     }
     response = main.handler(request, context={})
 
-    assert 'Single player game' in response['response']['outputSpeech']['ssml']
-    assert 'No really. Single' in response['response']['reprompt']['outputSpeech']['ssml']
+    assert 'audio src=' in response['response']['outputSpeech']['ssml']
+    assert 'Fantastic! Are you ready' in response['response']['outputSpeech']['ssml']
+    assert 'Ready to start' in response['response']['reprompt']['outputSpeech']['ssml']
     assert response['sessionAttributes'] == {
         'STATE': settings.STATES['buttonless_game'],
         'player_count': 1,
@@ -161,12 +171,14 @@ def test_start_yes_valid_four():
     }
     response = main.handler(request, context={})
 
-    # assert 'Single player game' in response['response']['outputSpeech']['ssml']
-    # assert 'No really. Single' in response['response']['reprompt']['outputSpeech']['ssml']
-    # assert response['sessionAttributes'] == {
-    #     'STATE': settings.STATES['buttonless_game'],
-    #     'player_count': 4,
-    # }
+    assert 'Ok. Players, press your buttons' in response['response']['outputSpeech']['ssml']
+    assert response['response']['directives'][0]['type'] == 'GameEngine.StartInputHandler'
+    assert response['response']['directives'][1]['type'] == 'GadgetController.SetLight'
+    assert response['response']['directives'][2]['type'] == 'GadgetController.SetLight'
+    assert 'input_handler_id' in response['sessionAttributes']
+    assert response['sessionAttributes']['STATE'] == settings.STATES['rollcall']
+    assert response['sessionAttributes']['player_count'] == 4
+    assert response['sessionAttributes']['buttons'] == []
 
 
 def test_end_session():
