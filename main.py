@@ -41,4 +41,6 @@ sb.add_request_handler(global_handlers.DefaultHandler())
 sb.add_global_request_interceptor(global_handlers.RequestInterceptor())
 sb.add_global_response_interceptor(global_handlers.ResponseInterceptor())
 
+sb.add_exception_handler(global_handlers.ErrorHandler())
+
 handler = sb.lambda_handler()

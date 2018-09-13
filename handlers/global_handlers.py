@@ -1,4 +1,5 @@
 from ask_sdk_core.dispatch_components import (
+    AbstractExceptionHandler,
     AbstractRequestHandler,
     AbstractRequestInterceptor,
     AbstractResponseInterceptor,
@@ -177,5 +178,19 @@ class SessionEndedRequestHandler(AbstractRequestHandler):
 
         del session_attrs['STATE']
         handler_input.response_builder.set_should_end_session(True)
+
+        return handler_input.response_builder.response
+
+
+class ErrorHandler(AbstractExceptionHandler):
+    def can_handle(self, handler_input, exception):
+        return True
+
+    def handle(self, handler_input, exception):
+        print(f"Handler -  {type(self).__name__}")
+        print(f"ERROR - {exception}")
+
+        text = "Uh oh. You've found an error. Please try again later."
+        handler_input.response_builder.speak(text)
 
         return handler_input.response_builder.response
