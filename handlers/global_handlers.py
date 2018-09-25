@@ -14,11 +14,15 @@ from utils.display import Display
 
 class RequestInterceptor(AbstractRequestInterceptor):
     def process(self, handler_input):
+        print('#' * 80)
         print('Request Intercepted')
         attrs_manager = handler_input.attributes_manager
         request_attrs = attrs_manager.request_attributes
         session_attrs = attrs_manager.session_attributes
         persistent_attrs = attrs_manager.persistent_attributes
+
+        print(f'----- REQUEST ENVELOPE -----\n{handler_input.request_envelope.to_dict()}')
+        print(f'----- INCOMING SESSION ATTRIBUTES -----\n{session_attrs}')
 
         # Ensure a state in case we're starting fresh
         if session_attrs.get('STATE') is None:
@@ -27,6 +31,7 @@ class RequestInterceptor(AbstractRequestInterceptor):
             session_attrs['STATE'] = settings.STATES['button_game']
         # Apply the persistent attributes to the current session
         attrs_manager.session_attributes = {**persistent_attrs, **session_attrs}
+        print(f'----- UPDATED SESSION ATTRIBUTES -----\n{attrs_manager.session_attributes}')
 
         # Ensure we're starting at a clean state.
         request_attrs['directives'] = []
@@ -45,8 +50,7 @@ class ResponseInterceptor(AbstractResponseInterceptor):
 
         # Debug
         print(f'----- REQUEST ATTRIBUTES -----\n{request_attrs}')
-        print(f'----- SESSION ATTRIBUTES -----\n{session_attrs}')
-        print(f'----- PERSISTENT ATTRIBUTES -----\n{persistent_attrs}')
+        print(f'----- SESSION / PERSISTENT ATTRIBUTES -----\n{session_attrs}')
 
         # Build the speech response
         if len(request_attrs['output_speech']) > 0:
@@ -80,8 +84,7 @@ class ResponseInterceptor(AbstractResponseInterceptor):
         attrs_manager.persistent_attributes = session_attrs
         attrs_manager.save_persistent_attributes()
 
-        print(f'----- NEW PERSISTENT ATTRIBUTES -----\n{persistent_attrs}')
-        print(f'----- RESPONSE -----\n{response}')
+        print(f'----- RESPONSE -----\n{response}\n\n')
 
         return response
 
@@ -129,9 +132,9 @@ class HelpHandler(AbstractRequestHandler):
             message_key = 'ROLL_CALL_HELP'
         elif session_attrs['STATE'] == settings.STATES['button_game']:
             message_key = 'GAME_PLAY_HELP'
-            del session_attrs['answering_button']
-            del session_attrs['answering_player']
-            del session_attrs['correct']
+            session_attrs.pop('answering_button', None)
+            session_attrs.pop('answering_player', None)
+            session_attrs.pop('correct', None)
         else:
             message_key = 'GENERAL_HELP'
 
@@ -176,7 +179,10 @@ class SessionEndedRequestHandler(AbstractRequestHandler):
 
         print(f'Reason: {handler_input.request_envelope.request.reason}')
 
-        del session_attrs['STATE']
+        if handler_input.request_envelope.request.reason == 'ERROR':
+            print(f"ERROR: {handler_input.request_envelope.request.error}")
+
+        session_attrs.pop('STATE', None)
         handler_input.response_builder.set_should_end_session(True)
 
         return handler_input.response_builder.response

@@ -96,7 +96,7 @@ msgid "PLAYERCOUNT_INVALID_reprompt"
 msgstr "Please say a number between 1 and {max_players}"
 
 msgid "SINGLE_PLAYER_GAME_READY_output_speech"
-msgstr "['Fantastic! Are you ready to start the game?']"
+msgstr "Fantastic! Are you ready to start the game?"
 
 msgid "SINGLE_PLAYER_GAME_READY_reprompt"
 msgstr "Ready to start the game?"
@@ -180,7 +180,7 @@ msgid "SINGLE_PLAYER_GAME_FINISHED_INTRO_output_speech"
 msgstr "The game is finished. Let's hear your final score."
 
 msgid "GAME_FINISHED_output_speech"
-msgstr "Thanks for playing"
+msgstr "Thanks for playing!"
 
 msgid "GAME_FINISHED_reprompt"
 msgstr ""
@@ -296,5 +296,30 @@ msgstr "{game_title} - Help"
 msgid "GAME_PLAY_HELP_display_text"
 msgstr "During the game, I will ask one question at a time. If you know the answer, press your button for a chance to answer. You will earn a point for each question you answer correctly."
 
+msgid "GAME_ROUND_SUMMARY_INTRO_output_speech"
+msgstr "After the <say-as interpret-as='ordinal'>{round}</say-as> round."
+
 msgid "GAME_ROUND_SUMMARY_OUTRO_output_speech"
 msgstr "Let's continue!"
+
+msgid "SCORING_TIED_NO_ANSWERS_output_speech"
+msgstr "It's a tie! With no correct answers. Can you do better?"
+
+msgid "SCORING_TIED_ONE_ANSWER_output_speech"
+msgstr "It's a tie! With a single correct answer. What a game!"
+
+msgid "SCORING_TIED_MULTIPLE_ANSWERS_output_speech"
+msgstr "It's a tie! With {answer_count} correct answers. What a game!"
+
+msgid "SCORING_SINGLE_PLAYER_NO_ANSWERS_output_speech"
+msgstr "You haven't answered any questions correctly"
+
+msgid "SCORING_SINGLE_PLAYER_ONE_ANSWER_output_speech"
+msgstr "You answered a single question correctly"
+
+msgid "SCORING_SINGLE_PLAYER_MULTIPLE_ANSWERS_output_speech"
+msgstr "You have {answer_count} correct answers"
+
+msgid "SCORING_MULTI_PLAYERS_output_speech"
+msgstr "In <say-as interpret-as='ordinal'>{place}</say-as> place, {score_details}"
+

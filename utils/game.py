@@ -1,3 +1,4 @@
+import random
 import re
 
 import utils
@@ -6,6 +7,7 @@ from config import settings
 from similarity.jarowinkler import JaroWinkler
 from utils.animations import BasicAnimations
 from utils.directives import GadgetController, GameEngine
+from utils.display import Display
 
 jw = JaroWinkler()
 
@@ -15,7 +17,7 @@ class GameHelper:
     def find_best_match(user_answer, answers):
         return [
             {
-                'target': 'answer',
+                'target': answer,
                 'rating': jw.similarity(answer, user_answer),
             } for answer in answers
         ]
@@ -60,71 +62,99 @@ class GameHelper:
     @staticmethod
     def get_formatted_scores(handler_input, scores, player_count):
         print(f"Getting formatted scores for {player_count} with scores {scores}.")
-        request_attrs = handler_input.attributes_manager.request_attributes
 
         ordered_scores = GameHelper.get_ordered_score_groups(scores, player_count)
-        print(ordered_scores)
+        print(f"Ordered_scores: {ordered_scores}")
 
         output_speech = ''
-        response_message = {}
+        message = {}
 
         if player_count == 1:
             if ordered_scores[0]['score'] == 0:
-                response_message = utils._('SCORING_SINGLE_PLAYER_NO_ANSWERS')
+                message = utils._('SCORING_SINGLE_PLAYER_NO_ANSWERS')
             elif ordered_scores[0]['score'] == 1:
-                response_message = utils._('SCORING_SINGLE_PLAYER_ONE_ANSWER')
+                message = utils._('SCORING_SINGLE_PLAYER_ONE_ANSWER')
             else:
                 data = {'answer_count': ordered_scores[0]['score']}
-                response_message = utils._('SCORING_SINGLE_PLAYER_MULTIPLE_ANSWERS', data)
+                message = utils._('SCORING_SINGLE_PLAYER_MULTIPLE_ANSWERS', data)
 
-            output_speech = f"{response_message['output_speech']}. "
+            output_speech = f"{message['output_speech']}. "
 
         else:
             if len(ordered_scores) == 1:
                 # handle the special case when all players are tied
                 if ordered_scores[0]['score'] == 0:
-                    response_message = utils._('SCORING_TIED_NO_ANSWERS')
+                    message = utils._('SCORING_TIED_NO_ANSWERS')
 
                 else:
                     if ordered_scores[0]['score'] == 1:
-                        response_message = utils._('SCORING_TIED_ONE_ANSWER')
+                        message = utils._('SCORING_TIED_ONE_ANSWER')
                     else:
                         data = {'answer_count': ordered_scores[0]['score']}
-                        response_message = utils._('SCORING_TIED_MULTIPLE_ANSWERS', data)
+                        message = utils._('SCORING_TIED_MULTIPLE_ANSWERS', data)
 
-                output_speech = f"{response_message['output_speech']} "
+                output_speech = f"{message['output_speech']} "
 
             else:
                 for i, scores in enumerate(ordered_scores):
-                    response_message = utils._('SCORING_MULTI_PLAYERS', {
+                    message = utils._('SCORING_MULTI_PLAYERS', {
                         'place': (1 + i),
                         'score_details': GameHelper.get_formatted_score_output(scores),
                     })
-                    output_speech += f"{response_message['output_speech']}. "
+                    output_speech += f"{message['output_speech']}. "
+
+        return output_speech
 
     @staticmethod
     def generate_round_summary_narration(handler_input, current_question, scores, player_count):
         print(f"generate_round_summary: question {current_question}, player_count {player_count}")
-        request_attrs = handler_input.attributes_manager.request_attributes
         questions_per_round = int(settings.GAME_OPTIONS['questions_per_round'])
         rounds_completed = (int(current_question) - 1) / questions_per_round
 
-        intro_prompt = utils._('GAME_ROUND_SUMMARY_INTRO', {'round': rounds_completed})
+        intro_prompt = utils._('GAME_ROUND_SUMMARY_INTRO', {'round': int(rounds_completed)})
         outro_prompt = utils._('GAME_ROUND_SUMMARY_OUTRO')
 
         output_speech = (
             f"<break time='1s'/>{intro_prompt['output_speech']} "
             f"{GameHelper.get_formatted_scores(handler_input, scores, player_count)}"
-            f"<break time='1s'/>{outtro_prompt['output_speech']}<break time='1s'/>"
+            f"<break time='1s'/>{outro_prompt['output_speech']}<break time='1s'/>"
         )
 
         return output_speech
 
     @staticmethod
-    def get_ordered_score_groups(scores={}, player_count=1):
+    def get_ordered_score_groups(scores, player_count):
+        # scores = scores or {}
+        # player_count = player_count or 1
+
+        # score_groups = {}
+        # for i in range(1, player_count + 1):
+        #     scores[i] = scores.get(i) or 1
+        #     score = scores[i]
+        #     if score not in score_groups:
+        #         score_groups[score] = []
+
+        #     score_groups[score].append(str(i))
+
+        # score_keys = list(score_groups.keys())
+        # score_keys.sort()
+        # score_keys.reverse()
+
+        # ordered_score_groups = []
+        # for i in range(len(score_keys)):
+        #     ordered_score_groups.append({
+        #         'score': score_keys[i],
+        #         'players': str(score_groups[score_keys[i]],)
+        #     })
+
+        # return ordered_score_groups
+
+        player_count = player_count or 1
+        scores = scores or {str(i + 1): 0 for i in range(player_count)}
         score_values = list(set(scores.values()))
-        score_values.sort().reverse()
-        ordered_groups = [{'score': v, 'players': []} for v in score_values}
+        score_values.sort()
+        score_values.reverse()
+        ordered_groups = [{'score': v, 'players': []} for v in score_values]
 
         for player, score in scores.items():
             for group in ordered_groups:
@@ -158,11 +188,11 @@ class Game:
         session_attrs = handler_input.attributes_manager.session_attributes
 
         # Clean the player state on the way out
-        del session_attrs['repeat']
-        del session_attrs['incorrect_answer_buttons']
-        del session_attrs['correct']
-        del session_attrs['answering_button']
-        del session_attrs['answering_player']
+        session_attrs.pop('repeat', None)
+        session_attrs.pop('incorrect_answer_buttons', None)
+        session_attrs.pop('correct', None)
+        session_attrs.pop('answering_button', None)
+        session_attrs.pop('answering_player', None)
 
         response_message = utils._('GAME_FINISHED' if reset_game else 'GAME_CANCELLED')
         # Display.render(handler_input, response_message)
@@ -178,15 +208,15 @@ class Game:
         if reset_game:
             final_scores = GameHelper.get_formatted_scores(
                 handler_input,
-                session_attrs['scores'],
+                session_attrs.get('scores'),
                 session_attrs['player_count']
             )
             multi_player = session_attrs['STATE'] == settings.STATES['button_game']
             msg_key = 'GAME_FINISHED_INTRO' if multi_player else 'SINGLE_PLAYER_GAME_FINISHED_INTRO'
             game_finished_message = utils._(msg_key)
 
-            if len(request_attributes['output_speech']) == 0:
-                request_attributes['output_speech'].append("<break time='2s'/>")
+            if len(request_attrs['output_speech']) == 0:
+                request_attrs['output_speech'].append("<break time='2s'/>")
 
             request_attrs['output_speech'].extend([
                 game_finished_message['output_speech'],
@@ -196,15 +226,16 @@ class Game:
             ])
 
             # Can we not just handler_input.attributes_manager.session_attributes = {}?
-            del session_attrs['answering_button']
-            del session_attrs['answering_player']
-            del session_attrs['buttons']
-            del session_attrs['correct']
-            del session_attrs['current_question']
-            del session_attrs['incorrect_answer_buttons']
-            del session_attrs['player_count']
-            del session_attrs['repeat']
-            del session_attrs['scores']
+            # session_attrs.pop('answering_button', None)
+            # session_attrs.pop('answering_player', None)
+            # session_attrs.pop('buttons', None)
+            # session_attrs.pop('correct', None)
+            # session_attrs.pop('current_question', None)
+            # session_attrs.pop('incorrect_answer_buttons', None)
+            # session_attrs.pop('player_count', None)
+            # session_attrs.pop('repeat', None)
+            # session_attrs.pop('scores', None)
+            handler_input.attributes_manager.session_attributes = {}
 
         else:
             request_attrs['output_speech'].append(response_message['output_speech'])
@@ -243,9 +274,9 @@ class Game:
             Game.reset_animations(handler_input, other_players)
 
         def _time_out(request_attrs, session_attrs, game_engine_events):
-            del session_attrs['correct']
-            del session_attrs['answering_button']
-            del session_attrs['answering_player']
+            session_attrs.pop('correct', None)
+            session_attrs.pop('answering_button', None)
+            session_attrs.pop('answering_player', None)
 
             response_message = utils._('ANSWER_TIME_OUT_DURING_PLAY')
             request_attrs['output_speech'].append(response_message['output_speech'])
@@ -302,8 +333,8 @@ class Game:
         session_attrs = handler_input.attributes_manager.session_attributes
 
         if not session_attrs['waiting_for_answer']:
-            del session_attrs['correct']
-            if int(session_attrs['current_question'] or 0) <= settings.GAME['questions_per_game']:
+            session_attrs.pop('correct', None)
+            if int(session_attrs['current_question'] or 0) <= settings.GAME_OPTIONS['questions_per_game']:
                 Game.stop_current_input_handler(handler_input)
                 message = utils._('ANSWER_BEFORE_QUESTION')
                 request_attrs['output_speech'].append(message['output_speech'])
@@ -318,19 +349,19 @@ class Game:
             session_attrs['STATE'] == settings.STATES['button_game'] and
             (not session_attrs['answer_button'] or not session_attrs['answering_player'])
         ):
-            del session_attrs['correct']
+            session_attrs.pop('correct', None)
             message = utils._('ANSWER_WITHOUT_BUTTONS')
             request_attrs['output_speech'].append(message['output_speech'])
             request_attrs['open_microphone'] = False
             return
 
         # get the answer out of the request event
-        answer = GameHelper.normalize_answer(request_env.request.intent.slots.answers.value)
+        answer = GameHelper.normalize_answer(request_env.request.intent.slots['answers'].value)
         if answer == '':
             message = utils._('MISUNDERSTOOD_ANSWER')
             request_attrs['output_speech'].append(message['output_speech'])
             request_attrs['reprompt'].append(message['reprompt'])
-                request_attrs['open_microphone'] = True
+            request_attrs['open_microphone'] = True
             return
 
         session_attrs['waiting_for_answer'] = False
@@ -345,21 +376,21 @@ class Game:
         correct_answer = GameHelper.normalize_answer(current_question['correct_answer'])
         matches = GameHelper.find_best_match(answer, answers)
 
-        print(f"COMPARING '{answer}' to [{answers}]: ({len(matches['ratings'])} matches)")
+        print(f"COMPARING '{answer}' to [{list(answers)}]: ({len(matches)} matches)")
         answered = False
-        for match in matches['ratings']:
+        for match in matches:
             if (
-                match['rating'] > settings.GAME['answer_similarity'] and
+                match['rating'] > settings.GAME_OPTIONS['answer_similarity'] and
                 match['target'] == correct_answer
             ):
                 session_attrs['current_question'] += 1
 
                 if 'scores' not in session_attrs:
-                    session_attrs['scores'] = {session_attrs['answering_player']: 1}
-                elif session_attrs['answering_player'] in session_attrs['scores']:
-                    session_attrs['scores'][session_attrs['answering_player']] += 1
-                else
-                    session_attrs['scores'][session_attrs['answering_player']] = 1
+                    session_attrs['scores'] = {str(session_attrs['answering_player']): 1}
+                elif str(session_attrs['answering_player']) in session_attrs['scores']:
+                    session_attrs['scores'][str(session_attrs['answering_player'])] += 1
+                else:
+                    session_attrs['scores'][str(session_attrs['answering_player'])] = 1
 
                 keys = {
                     True: 'SINGLE_PLAYER_CORRECT_ANSWER_DURING_PLAY',
@@ -372,8 +403,8 @@ class Game:
                 request_attrs['output_speech'].append(settings.AUDIO['correct_answer'])
                 request_attrs['output_speech'].append(message['output_speech'])
                 session_attrs['correct'] = True
-                del session_attrs['repeat']
-                del session_attrs['incorrect_answer_buttons']
+                session_attrs.pop('repeat', None)
+                session_attrs.pop('incorrect_answer_buttons', None)
 
                 print('Answer provided matched one of the expected answers!')
                 answered = True
@@ -396,9 +427,9 @@ class Game:
             # and there is at least one player available to answer
             # (each player only get's one shot at answering)
             elif not session_attrs.get('repeat') or (
-                session_attrs['repeat'] < settings.GAME['max_answers_per_question'] and
+                session_attrs['repeat'] < settings.GAME_OPTIONS['max_answers_per_question'] and
                 session_attrs['repeat'] + 1 < session_attrs['player_count']
-            )
+            ):
                 print("Answer provided doesn't seem to match any answers -> repeat question")
                 session_attrs['repeat'] = int(session_attrs.get('repeat') or 0) + 1
 
@@ -419,14 +450,14 @@ class Game:
             else:
                 print("Answer provided doesn't seem to match any answers -> skip question")
                 session_attrs['current_question'] += 1
-                del session_attrs['repeat']
-                del session_attrs['incorrect_answer_buttons']
+                session_attrs.pop('repeat', None)
+                session_attrs.pop('incorrect_answer_buttons', None)
 
                 keys = {
                     True: 'INCORRECT_ANSWER_DURING_PLAY',
                     False: 'INCORRECT_ANSWER_TOO_MANY_TIMES',
                 }
-                is_end = session_attrs['current_question'] >= settings.GAME['questions_per_game']
+                is_end = session_attrs['current_question'] >= settings.GAME_OPTIONS['questions_per_game']
                 message = utils._(keys[is_end], {
                     'player_number': session_attrs['answering_player']
                 })
@@ -447,12 +478,13 @@ class Game:
         request_env = handler_input.request_envelope
         request_attrs = handler_input.attributes_manager.request_attributes
         session_attrs = handler_input.attributes_manager.session_attributes
-        print(f'GAME: ask_question (currentQuestion = {sessionAttributes.currentQuestion})')
+        questions = utils._('QUESTIONS')
+        print(f"GAME: ask_question (currentQuestion = {session_attrs.get('current_question')})")
 
         if not is_following:
             # clean repeat state
-            del session_attrs['repeat']
-            del session_attrs['incorrect_answer_buttons']
+            session_attrs.pop('repeat', None)
+            session_attrs.pop('incorrect_answer_buttons', None)
 
         session_attrs['input_handler_id'] = request_env.request.request_id
 
@@ -461,41 +493,47 @@ class Game:
         else:
             session_attrs['current_question'] = current_question = 1
 
-        if not session_attrs['ordered_questions'] or (
+        if 'ordered_questions' not in session_attrs or (
             current_question == 1 and 'repeat' not in session_attrs
         ):
-            if settings.GAME['shuffle_questions']:
+            if settings.GAME_OPTIONS['shuffle_questions']:
                 print('GamePlay: producing ordered questions for new game (using shuffling)!')
                 # if this is the first question, then shuffle the questions
-                ordered_questions = GameHelper.shuffle_list([q['index'] for q in questions])
+                ordered_questions = [q['index'] for q in questions]
+                random.shuffle(ordered_questions)
             else:
                 print('GamePlay: producing ordered questions for new game (shuffling disabled)!')
                 ordered_questions = [q['index'] for q in questions]
 
-            ordered_questions = ordered_questions[:settings.GAME['questions_per_game']]
+            ordered_questions = ordered_questions[:settings.GAME_OPTIONS['questions_per_game']]
             session_attrs['ordered_questions'] = ordered_questions
 
-        shuffle_question = session_attrs['ordered_questions'][current_question - 1]
-        next_question = next((q for q in questions if q['index'] == shuffle_question), None)
-        print(
-            f"Ask question: {current_question} of {settings.GAME['questions_per_game']}, "
-            f"next question {next_question}"
-        )
-        if not next_question or current_question > settings.GAME['questions_per_game']:
+        if (
+            current_question > len(session_attrs['ordered_questions']) or
+            current_question > settings.GAME_OPTIONS['questions_per_game']
+        ):
             return Game.end_game(handler_input, True)
 
+        else:
+            shuffle_question = session_attrs['ordered_questions'][current_question - 1]
+            next_question = next((q for q in questions if q['index'] == shuffle_question), None)
+            print(
+                f"Ask question: {current_question} of {settings.GAME_OPTIONS['questions_per_game']}, "
+                f"next question {next_question}"
+            )
+
         interstitial_delay = 6000 if is_following else 3000
-        questions_per_round = int(settings.GAME['questions_per_round'])
+        questions_per_round = int(settings.GAME_OPTIONS['questions_per_round'])
 
         if (
-            current_question > 2 and not session_attrs['repeat'] and
+            current_question > 2 and 'repeat' not in session_attrs and
             (current_question - 1) % questions_per_round == 0
         ):
             interstitial_delay += 12000
             round_summary = GameHelper.generate_round_summary_narration(
                 handler_input,
                 session_attrs['current_question'],
-                session_attrs['scores'],
+                session_attrs.get('scores'),
                 session_attrs['player_count'],
             )
             request_attrs['output_speech'].append(round_summary)
@@ -527,7 +565,7 @@ class Game:
 
         # use a shorter break for buttonless games
         break_time = 4 if session_attrs['STATE'] == settings.STATES['button_game'] else 1
-        answers = f"<break time='{break_time}'/> Is it "
+        answers = f"<break time='{break_time}s'/> Is it "
         if next_question['answers']:
             if len(next_question['answers']) > 1:
                 answers += ', '.join(next_question['answers'][:-1])
@@ -545,8 +583,8 @@ class Game:
 
             Game.animate_buttons_after_answer(handler_input)
             Game.send_answer_interstitial(handler_input, interstitial_delay)
-            del session_attrs['answer_button']
-            del session_attrs['answering_player']
+            session_attrs.pop('answer_button', None)
+            session_attrs.pop('answering_player', None)
         else:
             request_attrs['reprompt'].append(answers)
 
@@ -561,7 +599,7 @@ class Game:
                 message['image'] = settings.pick_random(settings.IMAGES['incorrect_answer'])
             Display.render(handler_input, message)
 
-        del session_attrs['correct']
+        session_attrs.pop('correct', None)
 
     @staticmethod
     def listen_for_answer(handler_input):
@@ -676,5 +714,5 @@ class Game:
         request_attrs['directives'].append(GameEngine.set_button_down_animation({
             'targetGadets': all_players,
             'animations': BasicAnimations.solid_animation(1, 'black', 100),
-        })
+        }))
         request_attrs['open_microphone'] = False

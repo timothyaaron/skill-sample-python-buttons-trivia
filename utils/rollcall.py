@@ -290,7 +290,7 @@ class Helper:
 
     @staticmethod
     def start_roll_call(handler_input, message_key):
-        print('ROLLCALL_HELPER: resume roll call')
+        print('ROLLCALL_HELPER: start roll call')
         request_attrs = handler_input.attributes_manager.request_attributes
         session_attrs = handler_input.attributes_manager.session_attributes
         config = Helper.generate_input_handler_config(**{

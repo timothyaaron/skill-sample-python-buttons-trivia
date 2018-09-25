@@ -14,9 +14,9 @@ class EndGameHandler(AbstractRequestHandler):
         return (
             is_request_type("IntentRequest")(handler_input) and
             (
-                is_intent_name("AMAZON.StopIntent") or
-                is_intent_name("AMAZON.CancelIntent") or
-                is_intent_name("AMAZON.NoIntent")
+                is_intent_name("AMAZON.StopIntent")(handler_input) or
+                is_intent_name("AMAZON.CancelIntent")(handler_input) or
+                is_intent_name("AMAZON.NoIntent")(handler_input)
             ) and
             (
                 session_attrs['STATE'] == settings.STATES['button_game'] or
@@ -51,7 +51,7 @@ class PlayGameHandler(AbstractRequestHandler):
         session_attrs = handler_input.attributes_manager.session_attributes
         return (
             is_request_type("IntentRequest")(handler_input) and
-            is_intent_name("PlayGame") and
+            is_intent_name("PlayGame")(handler_input) and
             (
                 session_attrs['STATE'] == settings.STATES['button_game'] or
                 session_attrs['STATE'] == settings.STATES['buttonless_game']
@@ -78,7 +78,7 @@ class YesHandler(AbstractRequestHandler):
         session_attrs = handler_input.attributes_manager.session_attributes
         return (
             is_request_type("IntentRequest")(handler_input) and
-            is_intent_name("AMAZON.YesIntent") and
+            is_intent_name("AMAZON.YesIntent")(handler_input) and
             (
                 session_attrs['STATE'] == settings.STATES['button_game'] or
                 session_attrs['STATE'] == settings.STATES['buttonless_game']
@@ -98,8 +98,8 @@ class AnswerHandler(AbstractRequestHandler):
         return (
             is_request_type("IntentRequest")(handler_input) and
             (
-                is_intent_name("AnswerQuestionIntent") or
-                is_intent_name("AnswerOnlyIntent")
+                is_intent_name("AnswerQuestionIntent")(handler_input) or
+                is_intent_name("AnswerOnlyIntent")(handler_input)
             ) and
             (
                 session_attrs['STATE'] == settings.STATES['button_game'] or
@@ -120,8 +120,8 @@ class DontKnowNextHandler(AbstractRequestHandler):
         return (
             is_request_type("IntentRequest")(handler_input) and
             (
-                is_intent_name("DontKnowIntent") or
-                is_intent_name("AMAZON.NextIntent")
+                is_intent_name("DontKnowIntent")(handler_input) or
+                is_intent_name("AMAZON.NextIntent")(handler_input)
             ) and
             (
                 session_attrs['STATE'] == settings.STATES['button_game'] or

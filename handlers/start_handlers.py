@@ -169,7 +169,7 @@ class YesHandler(AbstractRequestHandler):
         request_attrs = handler_input.attributes_manager.request_attributes
         session_attrs = handler_input.attributes_manager.session_attributes
 
-        player_count = session_attrs['player_count']
+        player_count = session_attrs.get('player_count')
         valid_player_count = player_count and player_count <= settings.GAME_OPTIONS['max_players']
 
         if valid_player_count:

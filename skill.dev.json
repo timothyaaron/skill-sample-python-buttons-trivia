@@ -1,0 +1,54 @@
+{
+  "manifest": {
+    "publishingInformation": {
+      "locales": {
+        "en-US": {
+          "summary": "A trivia game made even better with Echo Buttons for competitive play.",
+          "examplePhrases": [
+            "Alexa, open even better buttons trivia",
+            "Alexa, start even better buttons trivia",
+            "Alexa, ask even better buttons trivia to start a new game"
+          ],
+          "keywords": [
+            "buttons",
+            "games",
+            "trivia"
+          ],
+          "name": "Even Better Buttons Trivia Template",
+          "description": "This is a fast-paced, trivia-style game, made better with Echo Buttons. Challenge your friends, or play by yourself."
+        }
+      },
+      "isAvailableWorldwide": false,
+      "category": "KNOWLEDGE_AND_TRIVIA",
+      "distributionCountries": [
+        "US"
+      ],
+      "gadgetSupport": {
+        "maxGadgetButtons": 4,
+        "minGadgetButtons": 1,
+        "requirement": "OPTIONAL",
+        "numPlayersMin": 1
+      }
+    },
+    "apis": {
+      "custom": {
+        "endpoint": {
+          "sslCertificateType": "Wildcard",
+          "uri": "https://07868db8.ngrok.io"
+        },
+        "interfaces": [
+          {
+            "type": "RENDER_TEMPLATE"
+          },
+          {
+            "type": "GAME_ENGINE"
+          },
+          {
+            "type": "GADGET_CONTROLLER"
+          }
+        ]
+      }
+    },
+    "manifestVersion": "1.0"
+  }
+}

@@ -29,9 +29,9 @@ Game Settings
 GAME_OPTIONS = {
     'game_title': 'Even Better Button Trivia',
     'max_players': 4,
-    'questions_per_game': 6,
+    'questions_per_game': 3,
     'questions_per_round': 2,
-    'answer_similarity': .60,
+    'answer_similarity': .80,
     'max_answers_per_question': 4,
     'shuffle_questions': True,
 }
