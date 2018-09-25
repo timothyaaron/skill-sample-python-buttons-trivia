@@ -60,7 +60,7 @@ en_US = [
         'correct_answer': 'wolf'
     }
 ]
-en_GB: [
+en_GB = [
     {
         'index': 1,
         'question': 'What is the name for a group of lions?',

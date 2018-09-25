@@ -1,6 +1,6 @@
 import gettext
 
-from config import questions, settings
+from config import messages, questions, settings
 
 
 def _(key, data={}):
@@ -8,15 +8,8 @@ def _(key, data={}):
         return questions.en_US
 
     else:
-        i18n = gettext.translation('messages', localedir='locale', languages=['en_US'])
+        output = dict(messages.en_US[key])
+        for k in output:
+            output[k] = output[k].format(**{**settings.GAME_OPTIONS, **data})
 
-        types = ['output_speech', 'reprompt', 'display_title', 'display_text']
-        messages = {}
-
-        for type_ in types:
-            expanded_key = f"{key}_{type_}"
-            output = i18n.gettext(expanded_key)
-            if output != expanded_key:
-                messages[type_] = output.format(**{**settings.GAME_OPTIONS, **data})
-
-        return messages
+        return output
