@@ -9,7 +9,6 @@ from ask_sdk_core.utils import is_intent_name, is_request_type
 import utils
 
 from config import settings
-from utils.display import Display
 
 
 class RequestInterceptor(AbstractRequestInterceptor):
@@ -46,7 +45,6 @@ class ResponseInterceptor(AbstractResponseInterceptor):
         attrs_manager = handler_input.attributes_manager
         request_attrs = attrs_manager.request_attributes
         session_attrs = attrs_manager.session_attributes
-        persistent_attrs = attrs_manager.persistent_attributes
 
         # Debug
         print(f'----- REQUEST ATTRIBUTES -----\n{request_attrs}')

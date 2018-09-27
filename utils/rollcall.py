@@ -159,7 +159,7 @@ class Helper:
         # 2) second pass through to see if there are any timeout events
         for i in range(len(events)):
             if 'roll_call_timeout' == events[i].name:
-                Helper.handle_roll_call_timeout(handler_input, events[i])
+                Helper.handle_roll_call_timeout(handler_input)
 
     @staticmethod
     def handle_roll_call_complete(handler_input, event):
@@ -182,11 +182,11 @@ class Helper:
         }))
         # display roll call complete animation on all buttons that were added to the game
         request_attrs['directives'].append(directives.GadgetController.set_idle_animation({
-            'targetGadgets': [b['button_id'] for b in session_attrs['buttons']],
+            'target_gadgets': [b['button_id'] for b in session_attrs['buttons']],
             'animations': settings.ANIMATIONS['roll_call_complete']
         }))
 
-        print(f"RollCall: resuming game play, from question: {session_attrs.get('current_question')}")
+        print(f"RollCall: resuming play from question: {session_attrs.get('current_question')}")
 
         current_prompts = None
         if settings.ROLLCALL_STATES['named_players']:
@@ -219,7 +219,6 @@ class Helper:
     def handle_roll_call_timeout(handler_input):
         print('ROLLCALL_HELPER: handling time out event during roll call')
         request_attrs = handler_input.attributes_manager.request_attributes
-        session_attrs = handler_input.attributes_manager.session_attributes
 
         # Reset button animation for all buttons
         request_attrs['directives'].append(DEFAULT_BUTTON_ANIMATION_DIRECTIVES['button_down'])
@@ -263,11 +262,11 @@ class Helper:
         request_attrs = handler_input.attributes_manager.request_attributes
 
         request_attrs['directives'].append(directives.GadgetController.set_idle_animation({
-            'targetGadgets': [button_id],
+            'target_gadgets': [button_id],
             'animations': settings.ANIMATIONS['roll_call_button_added']
         }))
         request_attrs['directives'].append(directives.GadgetController.set_button_down_animation({
-            'targetGadgets': [button_id],
+            'target_gadgets': [button_id],
             'animations': settings.ANIMATIONS['roll_call_checkin']
         }))
 
@@ -303,76 +302,6 @@ class Helper:
         request_attrs['output_speech'].append(message['output_speech'])
         request_attrs['output_speech'].append(settings.AUDIO['waiting_for_roll_call'])
         request_attrs['open_microphone'] = True
-
-        # request_attrs['directives'] = request_attrs['directives'][:1]
-        # request_attrs['directives'][0] = {
-        #     "events": {
-        #         "roll_call_button_1": {
-        #             "maximumInvocations": 1,
-        #             "meets": [
-        #                 "roll_call_button_1"
-        #             ],
-        #             "reports": "matches",
-        #             "shouldEndInputHandler": False
-        #         },
-        #         "roll_call_complete": {
-        #             "maximumInvocations": 1,
-        #             "meets": [
-        #                 "roll_call_all_buttons"
-        #             ],
-        #             "reports": "matches",
-        #             "shouldEndInputHandler": True
-        #         },
-        #         "roll_call_timeout": {
-        #             "meets": [
-        #                 "timed out"
-        #             ],
-        #             "reports": "history",
-        #             "shouldEndInputHandler": True
-        #         }
-        #     },
-        #     # "maximumHistoryLength": {},
-        #     "proxies": [
-        #         "btn1",
-        #         "btn2"
-        #     ],
-        #     "recognizers": {
-        #         "roll_call_all_buttons": {
-        #             "anchor": "end",
-        #             "fuzzy": True,
-        #             "pattern": [
-        #                 {
-        #                     "action": "down",
-        #                     "gadgetIds": [
-        #                         "btn1"
-        #                     ]
-        #                 },
-        #                 {
-        #                     "action": "down",
-        #                     "gadgetIds": [
-        #                         "btn2"
-        #                     ]
-        #                 }
-        #             ],
-        #             "type": "match"
-        #         },
-        #         "roll_call_button_1": {
-        #             "anchor": "end",
-        #             "fuzzy": True,
-        #             "pattern": [
-        #                 {
-        #                     "action": "down",
-        #                     "gadgetIds": [
-        #                         "btn1"
-        #                     ]
-        #                 }
-        #             ],
-        #             "type": "match"
-        #         }
-        #     },
-        #     "timeout": 35000,
-        #     "type": "GameEngine.StartInputHandler"
-        # }
 
         session_attrs['buttons'] = []
 

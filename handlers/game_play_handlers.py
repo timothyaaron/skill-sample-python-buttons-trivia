@@ -4,8 +4,7 @@ from ask_sdk_core.utils import is_intent_name, is_request_type
 import utils
 
 from config import settings
-from utils.game import Game, GameHelper
-from utils.rollcall import RollCall
+from utils.game import Game
 
 
 class EndGameHandler(AbstractRequestHandler):
@@ -131,7 +130,6 @@ class DontKnowNextHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         print('DontKnowNextHandler ----------------------')
-        request_env = handler_input.request_envelope
         attrs_manager = handler_input.attributes_manager
         request_attrs = attrs_manager.request_attributes
         session_attrs = attrs_manager.session_attributes
@@ -140,7 +138,7 @@ class DontKnowNextHandler(AbstractRequestHandler):
         is_last_question = session_attrs['current_question'] > settings.GAME['questions_per_game']
         key = 'LAST' if is_last_question else 'SKIP'
         message = utils._(f"PLAY_GAME_{key}_QUESTION")
-        request_attributes['output_speech'].append(f"{message['output_speech']}<break time='1s'/>")
+        request_attrs['output_speech'].append(f"{message['output_speech']}<break time='1s'/>")
 
         Game.ask_question(handler_input, False)
         return handler_input.response_builder.response

@@ -1,4 +1,9 @@
-en_US = {
+import copy
+
+from config import questions
+
+
+en = {
     "GENERAL_HELP": {
         'output_speech': "To get started just ask me to play a game. What would you like to do? ",
         'reprompt': "Sorry, I didn't catch that, what would you like to do next?",
@@ -176,8 +181,6 @@ en_US = {
     "GAME_PLAY_HELP": {
         'output_speech': "This is a trivia game for Echo Buttons. During the game, I will ask one question at a time. If you know the answer, press your button for a chance to answer. You will earn a point for each question you answer correctly. Would you like to continue to play?",
         'reprompt': "Sorry, I didn't catch that, what would you like to do next?",
-    },
-    "GAME_PLAY_HELP": {
         'display_title': "{game_title} - Help",
         'display_text': "During the game, I will ask one question at a time. If you know the answer, press your button for a chance to answer. You will earn a point for each question you answer correctly.",
     },
@@ -209,3 +212,11 @@ en_US = {
         'output_speech': "In <say-as interpret-as='ordinal'>{place}</say-as> place, {score_details}",
     },
 }
+
+en_US = copy.deepcopy(en)
+en_US['QUESTIONS'] = questions.en
+en_US['GAME_ROUND_SUMMARY_OUTRO'] = {'output_speech': "Let's continue!"}
+
+en_GB = copy.deepcopy(en)
+en_GB['QUESTIONS'] = questions.en
+en_GB['GAME_ROUND_SUMMARY_OUTRO'] = {'output_speech': "Onward!"}

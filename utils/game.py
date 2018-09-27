@@ -125,43 +125,21 @@ class GameHelper:
 
     @staticmethod
     def get_ordered_score_groups(scores, player_count):
-        # scores = scores or {}
-        # player_count = player_count or 1
+        # add a 0 if player hasn't scored yet
+        for i in range(player_count):
+            scores[str(i + 1)] = scores.get(str(i + 1)) or 0
 
-        # score_groups = {}
-        # for i in range(1, player_count + 1):
-        #     scores[i] = scores.get(i) or 1
-        #     score = scores[i]
-        #     if score not in score_groups:
-        #         score_groups[score] = []
-
-        #     score_groups[score].append(str(i))
-
-        # score_keys = list(score_groups.keys())
-        # score_keys.sort()
-        # score_keys.reverse()
-
-        # ordered_score_groups = []
-        # for i in range(len(score_keys)):
-        #     ordered_score_groups.append({
-        #         'score': score_keys[i],
-        #         'players': str(score_groups[score_keys[i]],)
-        #     })
-
-        # return ordered_score_groups
-
-        player_count = player_count or 1
-        scores = scores or {str(i + 1): 0 for i in range(player_count)}
+        # get all unique score values in highest-firest order
         score_values = list(set(scores.values()))
         score_values.sort()
         score_values.reverse()
-        ordered_groups = [{'score': v, 'players': []} for v in score_values]
 
-        for player, score in scores.items():
-            for group in ordered_groups:
-                if group['score'] == score:
-                    group['players'].append(player)
-                    break
+        # add player_ids to scores
+        ordered_groups = [
+            {
+                'score': v, 'players': [id for id, score in scores.items() if score == v]
+            } for v in score_values
+        ]
 
         return ordered_groups
 
@@ -226,16 +204,6 @@ class Game:
                 response_message['output_speech'],
             ])
 
-            # Can we not just handler_input.attributes_manager.session_attributes = {}?
-            # session_attrs.pop('answering_button', None)
-            # session_attrs.pop('answering_player', None)
-            # session_attrs.pop('buttons', None)
-            # session_attrs.pop('correct', None)
-            # session_attrs.pop('current_question', None)
-            # session_attrs.pop('incorrect_answer_buttons', None)
-            # session_attrs.pop('player_count', None)
-            # session_attrs.pop('repeat', None)
-            # session_attrs.pop('scores', None)
             handler_input.attributes_manager.session_attributes = {}
 
         else:
@@ -250,7 +218,7 @@ class Game:
 
         if session_attrs['input_handler_id']:
             request_attrs['directives'].append(
-                GameEngine.stop_input_handler({'id': session_attrs['input_handler_id']})
+                GameEngine.stop_input_handler(session_attrs['input_handler_id'])
             )
 
     @staticmethod
@@ -260,8 +228,8 @@ class Game:
             gadget_id = game_engine_events[0].input_events[0].gadget_id
             buttons = session_attrs['buttons']
 
-            player = next((b for b in buttons if b['buttonId'] == gadget_id), None)
-            session_attrs['answering_button'] = player['buttonId']
+            player = next((b for b in buttons if b['button_id'] == gadget_id), None)
+            session_attrs['answering_button'] = player['button_id']
             session_attrs['answering_player'] = player['count']
 
             response_message = utils._('BUZZ_IN_DURING_PLAY', {'player_number': player['count']})
@@ -270,7 +238,7 @@ class Game:
             request_attrs['reprompt'].append(response_message['reprompt'])
             request_attrs['open_microphone'] = True
 
-            other_players = [b['buttonId'] for b in buttons if b['buttonId'] != gadget_id]
+            other_players = [b['button_id'] for b in buttons if b['button_id'] != gadget_id]
             Game.reset_animations(handler_input, other_players)
 
         def _time_out(request_attrs, session_attrs, game_engine_events):
@@ -315,11 +283,11 @@ class Game:
         print("GAME: reset_animations")
         request_attrs = handler_input.attributes_manager.request_attributes
         request_attrs['directives'].append(GadgetController.set_idle_animation({
-            'targetGadets': buttons,
+            'target_gadgets': buttons,
             'animations': BasicAnimations.solid(1, "black", 100)
         }))
         request_attrs['directives'].append(GadgetController.set_button_down_animation({
-            'targetGadets': buttons,
+            'target_gadgets': buttons,
             'animations': BasicAnimations.solid(1, "black", 100)
         }))
 
@@ -345,7 +313,7 @@ class Game:
 
         elif (
             session_attrs['STATE'] == settings.STATES['button_game'] and
-            (not session_attrs['answer_button'] or not session_attrs['answering_player'])
+            (not session_attrs.get('answering_button') or not session_attrs.get('answering_player'))
         ):
             session_attrs.pop('correct', None)
             message = utils._('ANSWER_WITHOUT_BUTTONS')
@@ -581,7 +549,7 @@ class Game:
 
             Game.animate_buttons_after_answer(handler_input)
             Game.send_answer_interstitial(handler_input, interstitial_delay)
-            session_attrs.pop('answer_button', None)
+            session_attrs.pop('answering_button', None)
             session_attrs.pop('answering_player', None)
         else:
             request_attrs['reprompt'].append(answers)
@@ -613,7 +581,7 @@ class Game:
         # remove buttons that have answered this question incorrectly
         gadget_ids = [b['button_id'] for b in session_attrs['buttons']]
         incorrect_answer_buttons = session_attrs.get('incorrect_answer_buttons') or []
-        gadget_ids = filter(lambda id: id not in incorrect_answer_buttons, gadget_ids)
+        gadget_ids = list(filter(lambda id: id not in incorrect_answer_buttons, gadget_ids))
 
         request_attrs['directives'].append(GameEngine.start_input_handler({
             'timeout': 25000,
@@ -641,11 +609,11 @@ class Game:
             }
         }))
         request_attrs['directives'].append(GadgetController.set_button_down_animation({
-            'targetGadets': gadget_ids,
+            'target_gadgets': gadget_ids,
             'animations': settings.ANIMATIONS['buzz_in'],
         }))
         request_attrs['directives'].append(GadgetController.set_idle_animation({
-            'targetGadets': gadget_ids,
+            'target_gadgets': gadget_ids,
             'animations': settings.ANIMATIONS['listen_for_answer'],
         }))
 
@@ -692,25 +660,25 @@ class Game:
             if session_attrs['answering_button']:
                 key = 'correct_answer' if session_attrs['correct'] else 'incorrect_answer'
                 request_attrs['directives'].append(GadgetController.set_idle_animation({
-                    'targetGadets': [session_attrs['answering_button']],
+                    'target_gadgets': [session_attrs['answering_button']],
                     'animations': settings.ANIMATIONS[key],
                 }))
 
             if other_players:
                 key = 'correct_answer' if session_attrs['correct'] else 'incorrect_answer'
                 request_attrs['directives'].append(GadgetController.set_idle_animation({
-                    'targetGadets': other_players,
+                    'target_gadgets': other_players,
                     'animations': settings.ANIMATIONS['buzz_in_other_players'],
                 }))
 
         else:
             request_attrs['directives'].append(GadgetController.set_idle_animation({
-                'targetGadets': all_players,
+                'target_gadgets': all_players,
                 'animations': settings.ANIMATIONS['buzz_in_other_players'],
             }))
 
         request_attrs['directives'].append(GadgetController.set_button_down_animation({
-            'targetGadets': all_players,
+            'target_gadgets': all_players,
             'animations': BasicAnimations.solid(1, 'black', 100),
         }))
         request_attrs['open_microphone'] = False

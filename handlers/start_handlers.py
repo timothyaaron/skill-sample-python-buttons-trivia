@@ -2,7 +2,6 @@ from ask_sdk_core.dispatch_components import AbstractRequestHandler
 from ask_sdk_core.utils import is_intent_name, is_request_type
 
 import utils
-
 from config import settings
 from utils.directives import GadgetController
 from utils.display import Display
@@ -25,7 +24,6 @@ class LaunchPlayGameHandler(AbstractRequestHandler):
         attrs_manager = handler_input.attributes_manager
         request_attrs = attrs_manager.request_attributes
         session_attrs = attrs_manager.session_attributes
-        persistent_attrs = attrs_manager.persistent_attributes
         session_attrs['STATE'] = settings.STATES['start_game']
 
         # Check to see if we have an active game
