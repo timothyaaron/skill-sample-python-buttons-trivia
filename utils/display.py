@@ -1,13 +1,11 @@
 from ask_sdk_model.interfaces.display import ImageInstance, TextContent
+
 from config import settings
-# from utils import logger
 
 
 class Display:
     @staticmethod
     def render(handler_input, message):
-        request_attrs = handler_input.attributes_manager.request_attributes
-
         # # Check for display
         # if (!handlerInput.requestEnvelope.context.System.device.supportedInterfaces.Display) {
         #     logger.debug('No display to render.');

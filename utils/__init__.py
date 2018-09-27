@@ -1,5 +1,3 @@
-import gettext
-
 from config import messages, questions, settings
 
 

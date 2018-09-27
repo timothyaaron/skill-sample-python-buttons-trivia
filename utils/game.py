@@ -1,13 +1,14 @@
 import random
 import re
 
-import utils
-
-from config import settings
 from similarity.jarowinkler import JaroWinkler
+
+import utils
+from config import settings
 from utils.animations import BasicAnimations
 from utils.directives import GadgetController, GameEngine
 from utils.display import Display
+
 
 jw = JaroWinkler()
 
@@ -248,10 +249,9 @@ class Game:
         session_attrs = handler_input.attributes_manager.session_attributes
 
         if session_attrs['input_handler_id']:
-            request_attributes['directives'].append(
+            request_attrs['directives'].append(
                 GameEngine.stop_input_handler({'id': session_attrs['input_handler_id']})
             )
-
 
     @staticmethod
     def handle_game_input_event(handler_input):
@@ -287,8 +287,7 @@ class Game:
             questions = utils._('QUESTIONS')
             current_question = int(session_attrs.get('current_question', 1))
             shuffled_index = session_attrs['ordered_questions'][current_question - 1]
-            # trivia_question = next((q for q in questions if q['index'] == shuffled_index), None)
-            trivia_question = {'question': "What's the question?"}
+            trivia_question = next((q for q in questions if q['index'] == shuffled_index), None)
 
             data = {'question_number': current_question}
             response_message = utils._('ASK_QUESTION_DISPLAY', data)
@@ -296,7 +295,6 @@ class Game:
             # Display.render(handler_input, response_message)
 
             Game.listen_for_answer(handler_input)
-
 
         data = {
             'request_attrs': handler_input.attributes_manager.request_attributes,
@@ -310,7 +308,7 @@ class Game:
             'button_down_event': _button_down,
             'time_out_event': _time_out,
             'answer_interstitial_event': _answer_interstitial,
-        }.get(game_engine_events[0].name)(**data)
+        }.get(handler_input.request_envelope.request.events[0].name)(**data)
 
     @staticmethod
     def reset_animations(handler_input, buttons):
@@ -334,7 +332,7 @@ class Game:
 
         if not session_attrs['waiting_for_answer']:
             session_attrs.pop('correct', None)
-            if int(session_attrs['current_question'] or 0) <= settings.GAME_OPTIONS['questions_per_game']:
+            if int(session_attrs['current_question'] or 0) <= settings.GAME_OPTIONS['questions_per_game']:  # noqa
                 Game.stop_current_input_handler(handler_input)
                 message = utils._('ANSWER_BEFORE_QUESTION')
                 request_attrs['output_speech'].append(message['output_speech'])
@@ -457,7 +455,7 @@ class Game:
                     True: 'INCORRECT_ANSWER_DURING_PLAY',
                     False: 'INCORRECT_ANSWER_TOO_MANY_TIMES',
                 }
-                is_end = session_attrs['current_question'] >= settings.GAME_OPTIONS['questions_per_game']
+                is_end = session_attrs['current_question'] >= settings.GAME_OPTIONS['questions_per_game']  # noqa
                 message = utils._(keys[is_end], {
                     'player_number': session_attrs['answering_player']
                 })

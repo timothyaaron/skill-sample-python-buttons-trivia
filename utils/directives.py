@@ -21,7 +21,8 @@ class GameEngine:
 
 
 class GadgetController:
-    # returns a SetLight directive, with a 'buttonDown' trigger, that can be added to an Alexa skill response
+    # returns a SetLight directive, with a 'buttonDown' trigger,
+    # that can be added to an Alexa skill response
     @staticmethod
     def set_button_down_animation(params):
         return {
@@ -35,7 +36,8 @@ class GadgetController:
             }
         }
 
-    # returns a SetLight directive, with a 'buttonUp' trigger, that can be added to an Alexa skill response
+    # returns a SetLight directive, with a 'buttonUp' trigger,
+    # that can be added to an Alexa skill response
     @staticmethod
     def set_button_up_animation(params):
         return {
@@ -48,7 +50,8 @@ class GadgetController:
             }
         }
 
-    # returns a SetLight directive, with a 'none' trigger, that can be added to an Alexa skill response
+    # returns a SetLight directive, with a 'none' trigger,
+    # that can be added to an Alexa skill response
     @staticmethod
     def set_idle_animation(params):
         return {
