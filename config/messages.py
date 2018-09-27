@@ -68,7 +68,10 @@ en_US = {
         'display_text': "To resume the game, each player, please press your button once!",
     },
     "ROLL_CALL_COMPLETE": {
-        'output_speech': "Great! We can start the game. Are you ready?",
+        'output_speech': [
+            "Great! We can start the game. Are you ready?",
+            "Awesome. All players registered. Are you ready to start the game?",
+        ],
         'reprompt': "Ready to start the game?",
         'display_title': "{game_title} - Welcome",
         'display_text': "Are you ready to start the game?",

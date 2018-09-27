@@ -22,11 +22,11 @@ class GameEventHandler(AbstractRequestHandler):
         request_attrs = attrs_manager.request_attributes
         session_attrs = attrs_manager.session_attributes
 
-        if request_env.request.originating_request_id == session_attrs['input_handler_id']:
+        if request_env.request.originatingRequestId != session_attrs['input_handler_id']:
             print(
                 f"Global.GameEngineInputHandler: stale input event received -> "
-                f"received event from {request_env.request.originating_request_id} "
-                f" (was expecting {session_attrs['input_handler_id']})"
+                f"received event from {request_env.request.originatingRequestId} "
+                f"(was expecting {session_attrs['input_handler_id']})"
             )
             request_attrs['open_microphone'] = False
             return handler_input.response_builder.response

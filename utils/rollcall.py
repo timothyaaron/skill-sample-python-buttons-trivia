@@ -151,14 +151,14 @@ class Helper:
         # try to process events in order of importance
         # 1) first pass through to see if there are any non-timeout events
         for i in range(len(events)):
-            if 'roll_call_complete' == events[i]['name']:
+            if 'roll_call_complete' == events[i].name:
                 Helper.handle_roll_call_complete(handler_input, events[i])
-            elif events[i]['name'].startswith('roll_call_button'):
+            elif events[i].name.startswith('roll_call_button'):
                 Helper.handle_roll_call_button_check_in(handler_input, events[i])
 
         # 2) second pass through to see if there are any timeout events
         for i in range(len(events)):
-            if 'roll_call_timeout' == events[i]['name']:
+            if 'roll_call_timeout' == events[i].name:
                 Helper.handle_roll_call_timeout(handler_input, events[i])
 
     @staticmethod
@@ -168,12 +168,12 @@ class Helper:
         session_attrs = handler_input.attributes_manager.session_attributes
 
         # Move to the button game state to begin the game
-        session_attrs['STATE'] = settings.STATE['button_game']
+        session_attrs['STATE'] = settings.STATES['button_game']
         session_attrs['buttons'] = [
             {
-                'button_id': event['gadgetId'],
+                'button_id': event.gadget_id,
                 'count': i + 1,
-            } for i, event in enumerate(event['inputEvents'])
+            } for i, event in enumerate(event.input_events)
         ]
 
         # clear animations on all other buttons that haven't been added to the game
@@ -186,21 +186,20 @@ class Helper:
             'animations': settings.ANIMATIONS['roll_call_complete']
         }))
 
-        print(f"RollCall: resuming game play, from question: {session_attrs['current_question']}")
+        print(f"RollCall: resuming game play, from question: {session_attrs.get('current_question')}")
 
         current_prompts = None
-        if settings.ROLLCALL['named_players']:
+        if settings.ROLLCALL_STATES['named_players']:
             # tell the next player to press their button.
             message = utils._('ROLL_CALL_HELLO_PLAYER', {
-                player_number: len(session_attrs['buttons'])
+                'player_number': len(session_attrs['buttons'])
             })
             current_prompts = message
 
-        message = utils._('ROLL_CALL_COMPLETE', len(session_attrs['buttons']))
+        message = utils._('ROLL_CALL_COMPLETE')
         mixed_output_speech = ''
         if current_prompts:
             mixed_output_speech = " ".join([
-                current_prompts.output_speech,
                 settings.AUDIO['roll_call_complete'],
                 settings.pick_random(message['output_speech']),
             ])
@@ -210,7 +209,7 @@ class Helper:
                 settings.pick_random(message['output_speech']),
             ])
 
-        request_attrs.render(handler_input, message)
+        Display.render(handler_input, message)
         request_attrs['output_speech'].append(mixed_output_speech)
         request_attrs['reprompt'].append(message['reprompt'])
         request_attrs['open_microphone'] = True
@@ -236,8 +235,8 @@ class Helper:
         print(f"ROLLCALL_HELPER: handle button press event: {event}")
         session_attrs = handler_input.attributes_manager.session_attributes
 
-        button_id = event['inputEvents'][0]['gadgetId']
-        buttons = session_attrs.buttons or []
+        button_id = event.input_events[0].gadget_id
+        buttons = session_attrs['buttons'] or []
 
         # Check to see if we already have this button registered and if so skip registration
         for i in range(len(buttons)):
@@ -253,7 +252,7 @@ class Helper:
         })
         session_attrs['buttons'] = buttons
 
-        Helper.handlePlayerCheckedIn(handler_input, button_id, len(buttons))
+        Helper.handle_player_checked_in(handler_input, button_id, len(buttons))
 
     @staticmethod
     def handle_player_checked_in(handler_input, button_id, player_number):
@@ -272,14 +271,14 @@ class Helper:
             'animations': settings.ANIMATIONS['roll_call_checkin']
         }))
 
-        if (settings.ROLLCALL['NAMED_PLAYERS']):
+        if (settings.ROLLCALL_STATES['named_players']):
             # tell the next player to press their button.
             message = utils._('ROLL_CALL_HELLO_PLAYER', {
-                player_number: player_number
+                'player_number': player_number
             })
             current_prompts = message
             message = utils._('ROLL_CALL_NEXT_PLAYER_PROMPT', {
-                player_number: player_number + 1
+                'player_number': player_number + 1
             })
             request_attrs['output_speech'].append(current_prompts['output_speech'])
             request_attrs['output_speech'].append("<break time='1s'/>")
@@ -304,6 +303,76 @@ class Helper:
         request_attrs['output_speech'].append(message['output_speech'])
         request_attrs['output_speech'].append(settings.AUDIO['waiting_for_roll_call'])
         request_attrs['open_microphone'] = True
+
+        # request_attrs['directives'] = request_attrs['directives'][:1]
+        # request_attrs['directives'][0] = {
+        #     "events": {
+        #         "roll_call_button_1": {
+        #             "maximumInvocations": 1,
+        #             "meets": [
+        #                 "roll_call_button_1"
+        #             ],
+        #             "reports": "matches",
+        #             "shouldEndInputHandler": False
+        #         },
+        #         "roll_call_complete": {
+        #             "maximumInvocations": 1,
+        #             "meets": [
+        #                 "roll_call_all_buttons"
+        #             ],
+        #             "reports": "matches",
+        #             "shouldEndInputHandler": True
+        #         },
+        #         "roll_call_timeout": {
+        #             "meets": [
+        #                 "timed out"
+        #             ],
+        #             "reports": "history",
+        #             "shouldEndInputHandler": True
+        #         }
+        #     },
+        #     # "maximumHistoryLength": {},
+        #     "proxies": [
+        #         "btn1",
+        #         "btn2"
+        #     ],
+        #     "recognizers": {
+        #         "roll_call_all_buttons": {
+        #             "anchor": "end",
+        #             "fuzzy": True,
+        #             "pattern": [
+        #                 {
+        #                     "action": "down",
+        #                     "gadgetIds": [
+        #                         "btn1"
+        #                     ]
+        #                 },
+        #                 {
+        #                     "action": "down",
+        #                     "gadgetIds": [
+        #                         "btn2"
+        #                     ]
+        #                 }
+        #             ],
+        #             "type": "match"
+        #         },
+        #         "roll_call_button_1": {
+        #             "anchor": "end",
+        #             "fuzzy": True,
+        #             "pattern": [
+        #                 {
+        #                     "action": "down",
+        #                     "gadgetIds": [
+        #                         "btn1"
+        #                     ]
+        #                 }
+        #             ],
+        #             "type": "match"
+        #         }
+        #     },
+        #     "timeout": 35000,
+        #     "type": "GameEngine.StartInputHandler"
+        # }
 
         session_attrs['buttons'] = []
 

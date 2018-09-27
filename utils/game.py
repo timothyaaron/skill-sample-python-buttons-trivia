@@ -466,7 +466,6 @@ class Game:
                 request_attrs['output_speech'].append("<break time='2s'/>")
                 session_attrs['correct'] = False
 
-
         Game.ask_question(handler_input, True)
 
     @staticmethod
@@ -518,7 +517,8 @@ class Game:
             shuffle_question = session_attrs['ordered_questions'][current_question - 1]
             next_question = next((q for q in questions if q['index'] == shuffle_question), None)
             print(
-                f"Ask question: {current_question} of {settings.GAME_OPTIONS['questions_per_game']}, "
+                f"Ask question: {current_question} of "
+                f"{settings.GAME_OPTIONS['questions_per_game']}, "
                 f"next question {next_question}"
             )
 
@@ -692,14 +692,14 @@ class Game:
             ]
 
             if session_attrs['answering_button']:
-                key = 'correct_answer' if session_attributes['correct'] else 'incorrect_answer'
+                key = 'correct_answer' if session_attrs['correct'] else 'incorrect_answer'
                 request_attrs['directives'].append(GadgetController.set_idle_animation({
                     'targetGadets': [session_attrs['answering_button']],
                     'animations': settings.ANIMATIONS[key],
                 }))
 
             if other_players:
-                key = 'correct_answer' if session_attributes['correct'] else 'incorrect_answer'
+                key = 'correct_answer' if session_attrs['correct'] else 'incorrect_answer'
                 request_attrs['directives'].append(GadgetController.set_idle_animation({
                     'targetGadets': other_players,
                     'animations': settings.ANIMATIONS['buzz_in_other_players'],
@@ -711,8 +711,8 @@ class Game:
                 'animations': settings.ANIMATIONS['buzz_in_other_players'],
             }))
 
-        request_attrs['directives'].append(GameEngine.set_button_down_animation({
+        request_attrs['directives'].append(GadgetController.set_button_down_animation({
             'targetGadets': all_players,
-            'animations': BasicAnimations.solid_animation(1, 'black', 100),
+            'animations': BasicAnimations.solid(1, 'black', 100),
         }))
         request_attrs['open_microphone'] = False

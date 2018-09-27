@@ -10,6 +10,10 @@ def _(key, data={}):
     else:
         output = dict(messages.en_US[key])
         for k in output:
-            output[k] = output[k].format(**{**settings.GAME_OPTIONS, **data})
+            if isinstance(output[k], str):
+                output[k] = output[k].format(**{**settings.GAME_OPTIONS, **data})
+            elif isinstance(output[k], list):
+                for i, o in enumerate(output[k]):
+                    output[k][i] = o.format(**{**settings.GAME_OPTIONS, **data})
 
         return output

@@ -45,7 +45,6 @@ class LaunchPlayGameHandler(AbstractRequestHandler):
         attrs_manager.session_attributes = session_attrs
 
         # Build response
-        import pdb; pdb.set_trace()
         request_attrs['output_speech'].append(message['output_speech'])
         request_attrs['reprompt'].append(message['reprompt'])
         Display.render(handler_input, message)

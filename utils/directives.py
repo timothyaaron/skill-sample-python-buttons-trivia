@@ -7,7 +7,7 @@ class GameEngine:
             "timeout": params['timeout'],
             "recognizers": params['recognizers'],
             "events": params['events'],
-            "maximumHistoryLength": params.get('maximum_history', {}),
+            # "maximumHistoryLength": params.get('maximum_history', {}),
             "proxies": params.get('proxies', {}),
         }
 
