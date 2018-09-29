@@ -7,8 +7,8 @@ from ask_sdk_core.dispatch_components import (
 from ask_sdk_core.utils import is_intent_name, is_request_type
 
 import utils
-
 from config import settings
+from utils.display import Display
 
 
 class RequestInterceptor(AbstractRequestInterceptor):
@@ -139,7 +139,7 @@ class HelpHandler(AbstractRequestHandler):
         message = utils._(message_key)
         request_attrs['output_speech'].append(message['output_speech'])
         request_attrs['reprompt'].append(message['reprompt'])
-        # Display.render(handler_input, message)
+        Display.render(handler_input, message)
         request_attrs['open_microphone'] = True
 
         return handler_input.response_builder.response

@@ -38,10 +38,10 @@ class BasicAnimations:
     def solid(cycles, color, duration):
         return [{
             "repeat": cycles,
-            "targetLights": ["1"],
+            "target_lights": ["1"],
             "sequence": [
                 {
-                    "durationMs": duration,
+                    "duration_ms": duration,
                     "blend": False,
                     "color": ColorHelper.validate_color(color),
                 }
@@ -52,15 +52,15 @@ class BasicAnimations:
     def fade_in(cycles, color, duration):
         return [{
             "repeat": cycles,
-            "targetLights": ["1"],
+            "target_lights": ["1"],
             "sequence": [
                 {
-                    "durationMs": 1,
+                    "duration_ms": 1,
                     "blend": True,
                     "color": "000000"
                 },
                 {
-                    "durationMs": duration,
+                    "duration_ms": duration,
                     "blend": True,
                     "color": ColorHelper.validate_color(color)
                 }
@@ -71,14 +71,14 @@ class BasicAnimations:
     def fade_out(cycles, color, duration):
         return [{
             "repeat": cycles,
-            "targetLights": ["1"],
+            "target_lights": ["1"],
             "sequence": [
                 {
-                    "durationMs": duration,
+                    "duration_ms": duration,
                     "blend": True,
                     "color": ColorHelper.validate_color(color)
                 }, {
-                    "durationMs": 1,
+                    "duration_ms": 1,
                     "blend": True,
                     "color": "000000"
                 }
@@ -89,14 +89,14 @@ class BasicAnimations:
     def cross_fade(cycles, color_one, color_two, duration_one, duration_two):
         return [{
             "repeat": cycles,
-            "targetLights": ["1"],
+            "target_lights": ["1"],
             "sequence": [
                 {
-                    "durationMs": duration_one,
+                    "duration_ms": duration_one,
                     "blend": True,
                     "color": ColorHelper.validate_color(color_one)
                 }, {
-                    "durationMs": duration_two,
+                    "duration_ms": duration_two,
                     "blend": True,
                     "color": ColorHelper.validate_color(color_two)
                 }
@@ -107,25 +107,25 @@ class BasicAnimations:
     def breathe(cycles, color, duration):
         return [{
             "repeat": cycles,
-            "targetLights": ["1"],
+            "target_lights": ["1"],
             "sequence": [
                 {
-                    "durationMs": 1,
+                    "duration_ms": 1,
                     "blend": True,
                     "color": "000000"
                 },
                 {
-                    "durationMs": duration,
+                    "duration_ms": duration,
                     "blend": True,
                     "color": ColorHelper.validate_color(color)
                 },
                 {
-                    "durationMs": 300,
+                    "duration_ms": 300,
                     "blend": True,
                     "color": ColorHelper.validate_color(color)
                 },
                 {
-                    "durationMs": 300,
+                    "duration_ms": 300,
                     "blend": True,
                     "color": "000000"
                 }
@@ -136,15 +136,15 @@ class BasicAnimations:
     def blink(cycles, color):
         return [{
             "repeat": cycles,
-            "targetLights": ["1"],
+            "target_lights": ["1"],
             "sequence": [
                 {
-                    "durationMs": 500,
+                    "duration_ms": 500,
                     "blend": False,
                     "color": ColorHelper.validate_color(color)
                 },
                 {
-                    "durationMs": 500,
+                    "duration_ms": 500,
                     "blend": False,
                     "color": "000000"
                 }
@@ -155,15 +155,15 @@ class BasicAnimations:
     def flip(cycles, color_one, color_two, duration_one, duration_two):
         return [{
             "repeat": cycles,
-            "targetLights": ["1"],
+            "target_lights": ["1"],
             "sequence": [
                 {
-                    "durationMs": duration_one,
+                    "duration_ms": duration_one,
                     "blend": False,
                     "color": ColorHelper.validate_color(color_one)
                 },
                 {
-                    "durationMs": duration_two,
+                    "duration_ms": duration_two,
                     "blend": False,
                     "color": ColorHelper.validate_color(color_two)
                 }
@@ -174,15 +174,15 @@ class BasicAnimations:
     def pulse(cycles, color_one, color_two):
         return [{
             "repeat": cycles,
-            "targetLights": ["1"],
+            "target_lights": ["1"],
             "sequence": [
                 {
-                    "durationMs": 500,
+                    "duration_ms": 500,
                     "blend": True,
                     "color": ColorHelper.validate_color(color_one)
                 },
                 {
-                    "durationMs": 1000,
+                    "duration_ms": 1000,
                     "blend": True,
                     "color": ColorHelper.validate_color(color_two)
                 }
@@ -196,26 +196,26 @@ class ComplexAnimations:
         # blink correct color for 3 seconds
         sequence = [
             {
-                "durationMs": 500,
+                "duration_ms": 500,
                 "color": ColorHelper.validate_color(correct_color),
                 "blend": False
             },
             {
-                "durationMs": 500,
+                "duration_ms": 500,
                 "color": ColorHelper.validate_color('black'),
                 "blend": False
             }
         ] * 3
 
         sequence += [{
-            "durationMs": duration,
+            "duration_ms": duration,
             "color": ColorHelper.validate_color(baseline_color),
             "blend": False
         }]
 
         return [{
             "repeat": 1,
-            "targetLights": ["1"],
+            "target_lights": ["1"],
             "sequence": sequence
         }]
 
@@ -223,7 +223,7 @@ class ComplexAnimations:
     def spectrum(cycles, colors):
         sequence = [
             {
-                "durationMs": 400,
+                "duration_ms": 400,
                 "color": ColorHelper.validate_color(c),
                 "blend": True
             } for c in colors
@@ -231,6 +231,6 @@ class ComplexAnimations:
 
         return [{
             "repeat": cycles,
-            "targetLights": ["1"],
+            "target_lights": ["1"],
             "sequence": sequence
         }]

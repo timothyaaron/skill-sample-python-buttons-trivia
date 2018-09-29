@@ -137,7 +137,7 @@ class NoHandler(AbstractRequestHandler):
         message = utils._('DONT_RESUME_GAME')
         request_attrs['output_speech'].append(message['output_speech'])
         request_attrs['reprompt'].append(message['reprompt'])
-        # Display.render(handler_input, message)
+        Display.render(handler_input, message)
         request_attrs['open_microphone'] = True
 
         # Send intro animation
@@ -177,7 +177,7 @@ class YesHandler(AbstractRequestHandler):
                 request_attrs['output_speech'].append(settings.AUDIO['roll_call_complete'])
                 request_attrs['output_speech'].append(message['output_speech'])
                 request_attrs['reprompt'].append(message['reprompt'])
-                # Display.render(handler_input, message)
+                Display.render(handler_input, message)
 
                 request_attrs['open_microphone'] = True
 
@@ -198,7 +198,7 @@ class YesHandler(AbstractRequestHandler):
             message = utils._('RESUME_GAME')
             request_attrs['output_speech'].append(message['output_speech'])
             request_attrs['reprompt'].append(message['reprompt'])
-            # Display.render(handler_input, message)
+            Display.render(handler_input, message)
             request_attrs['open_microphone'] = True
 
         return handler_input.response_builder.response

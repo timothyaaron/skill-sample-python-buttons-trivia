@@ -174,7 +174,7 @@ class Game:
         session_attrs.pop('answering_player', None)
 
         response_message = utils._('GAME_FINISHED' if reset_game else 'GAME_CANCELLED')
-        # Display.render(handler_input, response_message)
+        Display.render(handler_input, response_message)
         request_attrs['open_microphone'] = False
         handler_input.response_builder.set_should_end_session(True)
 
@@ -260,7 +260,7 @@ class Game:
             data = {'question_number': current_question}
             response_message = utils._('ASK_QUESTION_DISPLAY', data)
             response_message['display_text'] = trivia_question['question']
-            # Display.render(handler_input, response_message)
+            Display.render(handler_input, response_message)
 
             Game.listen_for_answer(handler_input)
 

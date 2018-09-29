@@ -1,16 +1,17 @@
-from ask_sdk_model.interfaces.display import ImageInstance, TextContent
-
+from ask_sdk_model.interfaces.display import (BackButtonBehavior,
+                                              BodyTemplate1, BodyTemplate3,
+                                              Image, ImageInstance,
+                                              TextContent)
 from config import settings
 
 
 class Display:
     @staticmethod
     def render(handler_input, message):
-        # # Check for display
-        # if (!handlerInput.requestEnvelope.context.System.device.supportedInterfaces.Display) {
-        #     logger.debug('No display to render.');
-        #     return;
-        # }
+        # Check for display
+        if not handler_input.request_envelope.context.system.device.supported_interfaces.display:
+            print('No display to render.')
+            return
 
         if not message.get('display_text'):
             print('Render template without primary text!')
@@ -28,18 +29,17 @@ class Display:
             settings.pick_random(settings.IMAGES['background'])
         )
 
-        template = {
-            'type': 'BodyTemplate1',
-            'backButton': 'HIDDEN',
-            'backgroundImage': str(ImageInstance(background)),
+        data = {
+            'back_button': BackButtonBehavior('HIDDEN'),
+            'background_image': Image(sources=[ImageInstance(url=background)]),
             'title': message['display_title'],
-            'textContent': str(TextContent(text, subtext)),
+            'text_content': str(TextContent(text, subtext)),
         }
 
         if message.get('image'):
-            template['type']: 'BodyTemplate3'
-            template['image']: str(ImageInstance(message['image']))
+            image = Image(sources=[ImageInstance(url=message['image'])])
+            directive = BodyTemplate3(**data, image=image)
+        else:
+            directive = BodyTemplate1(**data)
 
-        # directive = template  # need to build the Display Directive
-
-        # request_attrs['directives'].append(directive)
+        handler_input.attributes_manager.request_attributes['directives'].append(directive)

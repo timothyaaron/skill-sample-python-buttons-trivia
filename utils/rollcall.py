@@ -35,13 +35,13 @@ ROLL_CALL_INPUT_HANDLER_CONFIG_TEMPLATE = {
         'roll_call_complete': {
             'meets': ['roll_call_all_buttons'],
             'reports': 'matches',
-            'shouldEndInputHandler': True,
-            'maximumInvocations': 1
+            'should_end_input_handler': True,
+            'maximum_invocations': 1
         },
         'roll_call_timeout': {
             'meets': ['timed out'],
             'reports': 'history',
-            'shouldEndInputHandler': True
+            'should_end_input_handler': True
         }
     }
 }
@@ -86,7 +86,7 @@ class Helper:
             name = f'btn{i + 1}'
             proxies.append(name)
             pattern_step = {
-                "gadgetIds": [name],
+                "gadget_ids": [name],
                 "action": "down",
             }
             all_buttons_pattern.append(pattern_step)
@@ -121,8 +121,8 @@ class Helper:
                     'meets': [name],
                     'reports': 'matches',
                     # intermediate events don't stop the input handler!
-                    'shouldEndInputHandler': False,
-                    'maximumInvocations': 1,
+                    'should_end_input_handler': False,
+                    'maximum_invocations': 1,
                 }
 
         return config
