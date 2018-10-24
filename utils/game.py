@@ -590,7 +590,7 @@ class Game:
                     'type': 'match',
                     'fuzzy': False,
                     'anchor': 'start',
-                    'gadgetIds': gadget_ids,
+                    'gadget_ids': gadget_ids,
                     'pattern': [{'action': 'down'}],
                 }
             },
@@ -598,13 +598,13 @@ class Game:
                 'button_down_event': {
                     'meets': ['any_button_buzz_in'],
                     'reports': 'matches',
-                    'shouldEndInputHandler': True,
-                    'maximumInvocations': 1
+                    'should_end_input_handler': True,
+                    'maximum_invocations': 1
                 },
                 'time_out_event': {
                     'meets': ['timed out'],
                     'reports': 'history',
-                    'shouldEndInputHandler': True
+                    'should_end_input_handler': True
                 }
             }
         }))
@@ -632,7 +632,7 @@ class Game:
                 'answer_interstitial_event': {
                     'meets': ['timed out'],
                     'reports': 'history',
-                    'shouldEndInputHandler': True,
+                    'should_end_input_handler': True,
                 }
             }
         }))

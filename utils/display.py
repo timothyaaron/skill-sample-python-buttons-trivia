@@ -1,6 +1,7 @@
 from ask_sdk_model.interfaces.display import (BackButtonBehavior,
                                               BodyTemplate1, BodyTemplate3,
-                                              Image, ImageInstance,
+                                              Image, ImageInstance, PlainText,
+                                              RenderTemplateDirective,
                                               TextContent)
 from config import settings
 
@@ -33,13 +34,15 @@ class Display:
             'back_button': BackButtonBehavior('HIDDEN'),
             'background_image': Image(sources=[ImageInstance(url=background)]),
             'title': message['display_title'],
-            'text_content': str(TextContent(text, subtext)),
+            'text_content': TextContent(PlainText(text), PlainText(subtext)),
         }
 
         if message.get('image'):
             image = Image(sources=[ImageInstance(url=message['image'])])
-            directive = BodyTemplate3(**data, image=image)
+            template = BodyTemplate3(**data, image=image)
         else:
-            directive = BodyTemplate1(**data)
+            template = BodyTemplate1(**data)
+
+        directive = RenderTemplateDirective(template=template)
 
         handler_input.attributes_manager.request_attributes['directives'].append(directive)
