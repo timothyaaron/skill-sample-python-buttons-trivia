@@ -136,7 +136,7 @@ class DontKnowNextHandler(AbstractRequestHandler):
 
         session_attrs['current_question'] = int(session_attrs.get('current_question', 0)) + 1
         is_last_question = session_attrs['current_question'] > settings.GAME['questions_per_game']
-        key = 'LAST' if is_last_question else 'SKIP'
+        key = 'SKIP_LAST' if is_last_question else 'SKIP'
         message = utils._(f"PLAY_GAME_{key}_QUESTION")
         request_attrs['output_speech'].append(f"{message['output_speech']}<break time='1s'/>")
 
